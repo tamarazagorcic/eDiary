@@ -31,9 +31,16 @@ public class SchoolClassDTO {
 	@NotNull(message = "Grade must be provided.")
 	private EGrade grade;
 	
+	
+//	@JsonView(View.Public.class)
+//	//@JsonManagedReference("classsemestar")
+//	private Semestar semestar;
+		
 	@JsonView(View.Public.class)
-	@JsonManagedReference("classsemestar")
-	private Semestar semestar;
+	//@JsonManagedReference("classsemestar")
+	private SemestarDTO semestarDTO;
+	
+
 	
 	@JsonIgnore
 	@JsonBackReference("classpupils")
@@ -42,6 +49,9 @@ public class SchoolClassDTO {
 	@JsonIgnore
 	@JsonBackReference("classprofesorsubject")
 	private List<ProfessorSubjectClass> professors_subjects;
+
+	
+
 
 	public Long getId() {
 		return id;
@@ -67,13 +77,7 @@ public class SchoolClassDTO {
 		this.grade = grade;
 	}
 
-	public Semestar getSemestar() {
-		return semestar;
-	}
 
-	public void setSemestar(Semestar semestar) {
-		this.semestar = semestar;
-	}
 
 	public List<PupilsInClass> getPupils() {
 		return pupils;
@@ -91,18 +95,31 @@ public class SchoolClassDTO {
 		this.professors_subjects = professors_subjects;
 	}
 
+	
+	public SemestarDTO getSemestarDTO() {
+		return semestarDTO;
+	}
+
+	public void setSemestarDTO(SemestarDTO semestarDTO) {
+		this.semestarDTO = semestarDTO;
+	}
+
 	public SchoolClassDTO() {
 		super();
 	}
 
 	public SchoolClassDTO(
 			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
-			@NotNull(message = "Grade must be provided.") EGrade grade, Semestar semestar) {
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO) {
 		super();
 		this.code = code;
 		this.grade = grade;
-		this.semestar = semestar;
+		this.semestarDTO = semestarDTO;
 	}
+
+
+
+
 	
 	
 	

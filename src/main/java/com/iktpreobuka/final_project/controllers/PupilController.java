@@ -22,9 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
+import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
+import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
+import com.iktpreobuka.final_project.services.UserService;
+import com.iktpreobuka.final_project.util.ParentCustomValidator;
 import com.iktpreobuka.final_project.util.PupilCustomValidator;
 import com.iktpreobuka.final_project.util.View;
 
@@ -39,6 +44,15 @@ public class PupilController {
 	@Autowired
 	PupilCustomValidator pupilValidator;
 
+	@Autowired
+	ParentCustomValidator parentValidator;
+	
+	@Autowired
+	private ParentService parentService;
+	
+	@Autowired
+	private UserService userService;
+	
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(pupilValidator);
@@ -55,8 +69,11 @@ public class PupilController {
 		try {
 			List<PupilDTO> list = new ArrayList<>();
 			for (Pupil pupil : pupilService.getAll()) {
+				Parent pt = pupil.getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				
 				PupilDTO pupilDTO = new PupilDTO(pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
-						pupil.getParent());
+						ptDTO);
 				list.add(pupilDTO);
 			}
 			if (list.size() != 0) {
@@ -77,8 +94,11 @@ public class PupilController {
 		try {
 			List<PupilDTO> list = new ArrayList<>();
 			for (Pupil pupil : pupilService.getAll()) {
+				Parent pt = pupil.getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				
 				PupilDTO pupilDTO = new PupilDTO(pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
-						pupil.getParent());
+						ptDTO);
 				list.add(pupilDTO);
 			}
 			if (list.size() != 0) {
@@ -101,8 +121,11 @@ public class PupilController {
 		try {
 			Optional<Pupil> pupil = pupilService.findById(id);
 			if (pupil.isPresent()) {
+				Parent pt = pupil.get().getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),
-						pupil.get().getJmbg(),pupil.get().getCode(),pupil.get().getParent());
+						pupil.get().getJmbg(),pupil.get().getCode(),ptDTO);
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
@@ -119,12 +142,32 @@ public class PupilController {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			pupilValidator.validate(newPupil, result);
+			//parentValidator.validate(newPupil.getParent(), result);
+			
 		}
 
-		Pupil newPupilEntity = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
-				newPupil.getParent());
+		ParentDTO parentDTO = newPupil.getParent();
+		
+		if(parentService.ifExists(parentDTO.getCode())) {
+			Parent parent = parentService.findByCode(parentDTO.getCode());
+			
+			
+			Pupil newPupilEntity = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
+					parent);
 
-		pupilService.addNew(newPupilEntity);
+			pupilService.addNew(newPupilEntity);
+		}else {
+			
+			Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode());
+			parentService.addNewParent(parent);
+			
+			Pupil newPupilE = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
+					parent);
+			
+			pupilService.addNew(newPupilE);
+		}
+		
+
 
 		return new ResponseEntity<>(newPupil, HttpStatus.OK);
 	}
@@ -149,8 +192,18 @@ public class PupilController {
 				pupil.get().setName(newPupil.getName());
 				pupil.get().setSurname(newPupil.getSurname());
 				pupil.get().setJmbg(newPupil.getJmbg());
-				pupil.get().setParent(newPupil.getParent());
-
+				ParentDTO parentDTO = newPupil.getParent();
+				
+				if(parentService.ifExists(parentDTO.getCode())) {
+					Parent parent = parentService.findByCode(parentDTO.getCode());
+					pupil.get().setParent(parent);
+				}else {
+					Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode());
+					parentService.addNewParent(parent);
+					pupil.get().setParent(parent);
+					
+				}
+				
 				pupilService.update(id, pupil.get());
 
 				return new ResponseEntity<>(newPupil, HttpStatus.OK);
@@ -170,8 +223,11 @@ public class PupilController {
 			Optional<Pupil> pupil = pupilService.findById(id);
 			if (pupil.isPresent()) {
 
+				Parent pt = pupil.get().getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),pupil.get().getJmbg(),
-						pupil.get().getCode(), pupil.get().getParent());
+						pupil.get().getCode(), ptDTO);
 				pupilService.delete(id);
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 			}

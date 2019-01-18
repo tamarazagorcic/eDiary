@@ -1,11 +1,20 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.repositories.PupilRepository;
+import com.iktpreobuka.final_project.repositories.PupilsInClassRepository;
 import com.iktpreobuka.final_project.repositories.SchoolClassRepository;
 
 @Service
@@ -13,6 +22,15 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 
 	@Autowired
 	private SchoolClassRepository scRepo;
+	
+	@Autowired
+	private PupilsInClassRepository pcRepo;
+	
+	@Autowired
+	private PupilRepository pRepo;
+	
+	@PersistenceContext
+	private EntityManager em;
 	
 	public Iterable<SchoolClass> getAll() {
 		return scRepo.findAll();
@@ -26,6 +44,7 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 
 	
 	public SchoolClass addNew(SchoolClass newSchoolClass) {
+		
 		
 		return scRepo.save(newSchoolClass);
 	}
@@ -60,5 +79,34 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		scRepo.deleteById(id);
 		return temp;
 	}
+	
+	public PupilsInClass addNewPC(Long idSC, Long idP) {
+	
+	SchoolClass tempSC = scRepo.findById(idSC).get();
+	Pupil tempP = pRepo.findById(idP).get();
+		
+		PupilsInClass entity = new PupilsInClass(tempSC,tempP);
+		return pcRepo.save(entity);
+	}
+
+
+	
+
+	@SuppressWarnings("unchecked")
+	
+	public List<SchoolClass> findClassesByPupils(Long id) {
+		
+     String str = "select sc from SchoolClass sc right join fetch sc.pupils p right join fetch p.pupil pu where pu.id = :id";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("id", id);
+		
+		
+		return query.getResultList();
+		
+	}
+
+
+	
 
 }

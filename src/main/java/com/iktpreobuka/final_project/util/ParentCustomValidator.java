@@ -25,8 +25,6 @@ public class ParentCustomValidator implements Validator{
 			errors.reject("400", "Name for parent must be provided.");
 		}if(parent.getSurname().equals("") || parent.getSurname().equals(" ")) {
 			errors.reject("400", "Surname for parent must be provided.");
-		}if(parent.getEmail().equals("") || parent.getEmail().equals(" ")) {
-			errors.reject("400", "Email for parent must be provided.");
 		}
 		
 	}

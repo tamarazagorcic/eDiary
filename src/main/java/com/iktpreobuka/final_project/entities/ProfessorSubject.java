@@ -14,6 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,6 +30,9 @@ public class ProfessorSubject {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column
 	private Long id;
+	
+	@Version
+	@ColumnDefault("0")
 	private Integer version;
 	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
@@ -69,6 +75,12 @@ public class ProfessorSubject {
 	public void setVersion(Integer version) {
 		this.version = version;
 	}
+	public ProfessorSubject(Professor professor, Subject subject) {
+		super();
+		this.professor = professor;
+		this.subject = subject;
+	}
+	
 	
 	
 }

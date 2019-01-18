@@ -77,5 +77,22 @@ public class SemestarServiceImpl implements SemestarService{
 		return temp;
 	}
 	
+	public boolean ifExists(String code) {
+		
+		if(semestarRepo.findByCode(code) != null) {
+			return true;
+		}else return false;
+		
+		
+	}
 	
+	public Semestar findByCode(String code) {
+		
+		return semestarRepo.findByCode(code);
+	}
+	
+//	public Semestar findByCode(String code) {
+//		return semestarRepo.findByCode(code).get();
+//		
+//	}
 }

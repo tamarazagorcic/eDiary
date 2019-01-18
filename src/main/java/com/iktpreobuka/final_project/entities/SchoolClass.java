@@ -2,6 +2,7 @@ package com.iktpreobuka.final_project.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,7 +39,7 @@ public class SchoolClass {
 	@Column
 	private EGrade grade;
 	
-	@Column
+	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "semestar")
 	private Semestar semestar;
@@ -82,8 +83,23 @@ public class SchoolClass {
 	public void setSemestar(Semestar semestar) {
 		this.semestar = semestar;
 	}
+	
+	
 	public SchoolClass() {
 		super();
+	}
+
+	public List<PupilsInClass> getPupils() {
+		return pupils;
+	}
+	public void setPupils(List<PupilsInClass> pupils) {
+		this.pupils = pupils;
+	}
+	public List<ProfessorSubjectClass> getProfessors_subjects() {
+		return professors_subjects;
+	}
+	public void setProfessors_subjects(List<ProfessorSubjectClass> professors_subjects) {
+		this.professors_subjects = professors_subjects;
 	}
 	public SchoolClass(String code, EGrade grade, Semestar semestar) {
 		super();
@@ -91,6 +107,7 @@ public class SchoolClass {
 		this.grade = grade;
 		this.semestar = semestar;
 	}
+
 	
 	
 	

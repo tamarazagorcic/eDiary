@@ -23,8 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Professor;
+import com.iktpreobuka.final_project.entities.Subject;
+import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ProfessorDTO;
+import com.iktpreobuka.final_project.entities.dto.RoleDTO;
+import com.iktpreobuka.final_project.entities.dto.SubjectDTO;
 import com.iktpreobuka.final_project.services.ProfessorService;
+import com.iktpreobuka.final_project.services.SubjectService;
+import com.iktpreobuka.final_project.services.UserService;
 import com.iktpreobuka.final_project.util.ProfessorCustomValidator;
 import com.iktpreobuka.final_project.util.View;
 
@@ -38,6 +44,13 @@ public class ProfessorController {
 
 	@Autowired
 	ProfessorCustomValidator professorValidator;
+	
+	@Autowired
+	private UserService userService;
+	
+
+	@Autowired
+	private SubjectService subjectService;
 
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
@@ -55,7 +68,14 @@ public class ProfessorController {
 		try {
 			List<ProfessorDTO> list = new ArrayList<>();
 			for (Professor professor : professorService.getAll()) {
-				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode());
+				
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
+				
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode(),listSubjectDTO);
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
@@ -75,7 +95,13 @@ public class ProfessorController {
 		try {
 			List<ProfessorDTO> list = new ArrayList<>();
 			for (Professor professor : professorService.getAll()) {
-				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode());
+				
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode(),listSubjectDTO);
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
@@ -95,7 +121,13 @@ public class ProfessorController {
 		try {
 			List<ProfessorDTO> list = new ArrayList<>();
 			for (Professor professor : professorService.getAll()) {
-				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode());
+				
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode(),listSubjectDTO);
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
@@ -118,8 +150,13 @@ public class ProfessorController {
 		try {
 			Optional<Professor> professor = professorService.findById(id);
 			if (professor.isPresent()) {
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.get().getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),professor.get().getSurname(),
-						professor.get().getCode());
+						professor.get().getCode(),listSubjectDTO);
 				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
@@ -138,9 +175,18 @@ public class ProfessorController {
 			professorValidator.validate(newProfessor, result);
 		}
 
-		Professor newProfessorEntity = new Professor(newProfessor.getName(),newProfessor.getSurname(),newProfessor.getCode());
+		User professorUser = new User(newProfessor.getProfessorUser().getEmail(),newProfessor.getProfessorUser().getPassword(),
+				newProfessor.getProfessorUser().getUsername());
+		
+		User thisUser = userService.addNewUser(professorUser, "professor");
+		
+		Professor newProfessorEntity = new Professor(newProfessor.getName(),newProfessor.getSurname(),newProfessor.getCode(),thisUser);
 
 		professorService.addNew(newProfessorEntity);
+		
+		RoleDTO roleDTO = new RoleDTO(thisUser.getRole().getName());
+		
+		newProfessor.getProfessorUser().setRole(roleDTO);
 
 		return new ResponseEntity<>(newProfessor, HttpStatus.OK);
 	}
@@ -164,6 +210,8 @@ public class ProfessorController {
 				professor.get().setCode(newProfessor.getCode());
 				professor.get().setName(newProfessor.getName());
 				professor.get().setSurname(newProfessor.getSurname());
+				
+				//List<Subject> list = newProfessor.getSubjects();
 
 				professorService.update(id, professor.get());
 
@@ -184,8 +232,13 @@ public class ProfessorController {
 			Optional<Professor> professor = professorService.findById(id);
 			if (professor.isPresent()) {
 
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.get().getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),professor.get().getSurname(),
-						professor.get().getCode());
+						professor.get().getCode(),listSubjectDTO);
 				professorService.delete(id);
 				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 			}
@@ -196,6 +249,36 @@ public class ProfessorController {
 		}
 	}
 	
-	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}")
+	public ResponseEntity<?> conectionProfessorSubject(@PathVariable Long idP, @PathVariable Long idS) {
+
+		try {
+			Optional<Professor> professor = professorService.findById(idP);
+			Optional<Subject> subject = subjectService.findById(idS);
+			if (professor.isPresent() && subject.isPresent()) {
+				
+
+				professorService.addNewPS(professor.get(), subject.get());
+				//professorService.update(id, professor.get());
+				
+				
+				
+				List<SubjectDTO> list = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.get().getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					list.add(subjectDTO);
+				}
+				
+
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),professor.get().getSurname(),professor.get().getCode(),list);
+				return new ResponseEntity<>(professorDTO, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 }

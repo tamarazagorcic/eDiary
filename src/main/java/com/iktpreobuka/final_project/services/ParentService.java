@@ -11,5 +11,8 @@ public interface ParentService {
 	Parent addNewParent(Parent newParent);
 	 Parent updateParent(Long id, Parent newParent);
 	 Parent deleteParent(Long id);
+	 
+	 boolean ifExists(String code);
+	 Parent findByCode(String code);
 	
 }

@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,8 +26,14 @@ public class Subject {
 	@Id
 	@GeneratedValue
 	private Long id;
+	
+	@Column(unique = true)
 	private String name;
+	@Column(unique = true)
 	private String code;
+	
+	@Version
+	@ColumnDefault("0")
 	private Integer version;
 	
 	@JsonIgnore
@@ -57,6 +67,17 @@ public class Subject {
 	}
 	public Subject() {
 		super();
+	}
+	public Subject(String name, String code) {
+		super();
+		this.name = name;
+		this.code = code;
+	}
+	public List<ProfessorSubject> getProfessors() {
+		return professors;
+	}
+	public void setProfessors(List<ProfessorSubject> professors) {
+		this.professors = professors;
 	}
 	
 	

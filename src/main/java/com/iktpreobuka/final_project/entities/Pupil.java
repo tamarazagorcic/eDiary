@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -22,22 +23,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table (name="pupil")
 
-public class Pupil {
+public class Pupil extends Person{
 
-	@Id
-	@GeneratedValue
-	private Long id;
-	@Column
-	private String name;
-	@Column
-	private String surname;
+	
 	@Column
 	private String jmbg;
-	@Column(unique=true)
-	private String code;
-	@Version
-	@ColumnDefault("0")
-	private Integer version;
+	
 	
 	@JsonIgnore
 	@OneToMany(mappedBy = "pupil", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
@@ -47,47 +38,37 @@ public class Pupil {
 	@JoinColumn(name = "parent")
 	private Parent parent;
 	
+	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user_id;
+	
+	
+	
+	public User getUser_id() {
+		return user_id;
+	}
+	public void setUser_id(User user_id) {
+		this.user_id = user_id;
+	}
 	public Parent getParent() {
 		return parent;
 	}
 	public void setParent(Parent parent) {
 		this.parent = parent;
 	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getSurname() {
-		return surname;
-	}
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
+	
 	public String getJmbg() {
 		return jmbg;
 	}
 	public void setJmbg(String jmbg) {
 		this.jmbg = jmbg;
 	}
-	public String getCode() {
-		return code;
+	
+	public List<PupilsInClass> getSchoolClasses() {
+		return schoolClasses;
 	}
-	public void setCode(String code) {
-		this.code = code;
-	}
-	public Integer getVersion() {
-		return version;
-	}
-	public void setVersion(Integer version) {
-		this.version = version;
+	public void setSchoolClasses(List<PupilsInClass> schoolClasses) {
+		this.schoolClasses = schoolClasses;
 	}
 	public Pupil() {
 		super();
@@ -100,7 +81,7 @@ public class Pupil {
 		this.code = code;
 		this.parent = parent;
 	}
-
+	
 	
 	
 }

@@ -9,6 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -21,26 +24,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table (name="professor",uniqueConstraints = {@UniqueConstraint(columnNames = "code")})
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Professor {
 
+public class Professor extends Person{
+
+	
 	@Id
 	@GeneratedValue
 	private Long id;
-	@Column
-	private String name;
-	@Column
-	private String surname;
-	@Column(unique = true)
-	private String code;
-	@Version
-	@ColumnDefault("0")
-	private Integer version;
 	
 	
-	@JsonIgnore
 	@OneToMany(mappedBy = "professor", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<ProfessorSubject> subjects = new ArrayList<>();
+	
+
+	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user_id;
+	
+	
 	
 	
 	public Long getId() {
@@ -49,45 +50,28 @@ public class Professor {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getName() {
-		return name;
+	public User getUser_id() {
+		return user_id;
 	}
-	
+	public void setUser_id(User user_id) {
+		this.user_id = user_id;
+	}
 	public List<ProfessorSubject> getSubjects() {
 		return subjects;
 	}
 	public void setSubjects(List<ProfessorSubject> subjects) {
 		this.subjects = subjects;
 	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getSurname() {
-		return surname;
-	}
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
-	public String getCode() {
-		return code;
-	}
-	public void setCode(String code) {
-		this.code = code;
-	}
-	public Integer getVersion() {
-		return version;
-	}
-	public void setVersion(Integer version) {
-		this.version = version;
-	}
+	
 	public Professor() {
 		super();
 	}
-	public Professor(String name, String surname, String code) {
+	public Professor(String name, String surname, String code, User user_id) {
 		super();
 		this.name = name;
 		this.surname = surname;
 		this.code = code;
+		this.user_id = user_id;
 	}
 	
 	

@@ -28,24 +28,32 @@ public class ParentDTO {
 	@NotNull(message = "Surname must be provided.")
 	@Size(min=2, max=30, message = "Surame must be between {min} and {max} characters long.")
 	private String surname;
-	@JsonView(View.Admin.class)
-	@NotNull(message = "Email must be provided.")
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", 
-	message="Email is not valid.")
-	private String email;
+	
 	@JsonView(View.Admin.class)
 	@NotNull(message = "Code must be provided.")
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
+	@JsonView(View.Admin.class)
+	private UserDTO parentUser;
 	
 	
 	@JsonIgnore
 	@JsonBackReference("parentpupils")	
-	private List<Pupil> parent_pupils;
+	private List<PupilDTO> parent_pupils;
 
 
-	
+
+	public UserDTO getParentUser() {
+		return parentUser;
+	}
+
+
+	public void setParentUser(UserDTO parentUser) {
+		this.parentUser = parentUser;
+	}
+
+
 	public String getCode() {
 		return code;
 	}
@@ -86,41 +94,53 @@ public class ParentDTO {
 	}
 
 
-	public String getEmail() {
-		return email;
-	}
+	
 
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
 
 
-	public List<Pupil> getParent_pupils() {
+
+
+
+	public List<PupilDTO> getParent_pupils() {
 		return parent_pupils;
 	}
 
 
-	public void setParent_pupils(List<Pupil> parent_pupils) {
+	public void setParent_pupils(List<PupilDTO> parent_pupils) {
 		this.parent_pupils = parent_pupils;
 	}
 
 
-
-
-
-	public ParentDTO(String name, String surname, String email, String code) {
+	public ParentDTO(String name, String surname, String code) {
 		super();
 		this.name = name;
 		this.surname = surname;
-		this.email = email;
+		//this.email = email;
 		this.code = code;
+	}
+
+
+	
+
+	public ParentDTO(
+			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			UserDTO parentUser) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.parentUser = parentUser;
 	}
 
 
 	public ParentDTO() {
 		super();
 	}
+
+
 	
 	
 	

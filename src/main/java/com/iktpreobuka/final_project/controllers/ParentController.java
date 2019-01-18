@@ -23,8 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
+import com.iktpreobuka.final_project.entities.Role;
+import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
+import com.iktpreobuka.final_project.entities.dto.RoleDTO;
 import com.iktpreobuka.final_project.services.ParentService;
+import com.iktpreobuka.final_project.services.UserService;
 import com.iktpreobuka.final_project.util.ParentCustomValidator;
 import com.iktpreobuka.final_project.util.View;
 
@@ -37,6 +41,9 @@ public class ParentController {
 
 	@Autowired
 	ParentCustomValidator parentValidator;
+	
+	@Autowired
+	private UserService userService;
 
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
@@ -54,7 +61,7 @@ public class ParentController {
 		try {
 			List<ParentDTO> list = new ArrayList<>();
 			for (Parent parent : parentService.getAllParents()) {
-				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getEmail(),parent.getCode());
+				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getCode());
 				list.add(parentDTO);
 			}
 			if (list.size() != 0) {
@@ -75,7 +82,7 @@ public class ParentController {
 		try {
 			List<ParentDTO> list = new ArrayList<>();
 			for (Parent parent : parentService.getAllParents()) {
-				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getEmail(),parent.getCode());
+				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getCode());
 				list.add(parentDTO);
 			}
 			if (list.size() != 0) {
@@ -97,7 +104,7 @@ public class ParentController {
 		try {
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
-				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),parent.get().getEmail(),
+				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
 				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
 			}
@@ -117,9 +124,21 @@ public class ParentController {
 			parentValidator.validate(newParent, result);
 		}
 
-		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),newParent.getEmail(),newParent.getCode());
-
+		
+		
+		User parentUser = new User(newParent.getParentUser().getEmail(),newParent.getParentUser().getPassword(),
+				newParent.getParentUser().getUsername());
+		
+		User thisUser = userService.addNewUser(parentUser, "parent");
+		
+		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),newParent.getCode(),thisUser );
 		parentService.addNewParent(newParentEntity);
+		
+		
+		RoleDTO roleDTO = new RoleDTO(thisUser.getRole().getName());
+		
+		newParent.getParentUser().setRole(roleDTO);
+		
 
 		return new ResponseEntity<>(newParent, HttpStatus.OK);
 	}
@@ -142,8 +161,8 @@ public class ParentController {
 			if (parent.isPresent()) {
 				parent.get().setCode(newParent.getCode());
 				parent.get().setName(newParent.getName());
-				parent.get().setEmail(newParent.getEmail());
 				parent.get().setSurname(newParent.getSurname());
+				
 
 				parentService.updateParent(id, parent.get());
 
@@ -164,7 +183,7 @@ public class ParentController {
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
 
-				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),parent.get().getEmail(),
+				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
 				parentService.deleteParent(id);
 				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);

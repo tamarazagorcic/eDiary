@@ -72,6 +72,11 @@ public class PupilsInClass {
 	public PupilsInClass() {
 		super();
 	}
+	public PupilsInClass(SchoolClass schoolClass, Pupil pupil) {
+		super();
+		this.schoolClass = schoolClass;
+		this.pupil = pupil;
+	}
 	
 	
 	

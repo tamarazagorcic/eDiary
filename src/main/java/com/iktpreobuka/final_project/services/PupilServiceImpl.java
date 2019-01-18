@@ -1,18 +1,29 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.repositories.PupilRepository;
+import com.iktpreobuka.final_project.repositories.PupilsInClassRepository;
 
 @Service
 public class PupilServiceImpl implements PupilService{
 
 	@Autowired
 	private PupilRepository pupilRepo;
+	
+	@PersistenceContext
+	private EntityManager em;
+	
+	
 	
 	public Iterable<Pupil> getAll() {
 		return pupilRepo.findAll();
@@ -54,5 +65,19 @@ public class PupilServiceImpl implements PupilService{
 		Pupil temp = pupilRepo.findById(id).get();
 		pupilRepo.deleteById(id);
 		return temp;
+	}
+	
+	@SuppressWarnings("unchecked")
+	
+	public List<Pupil> findPupilsByClass(Long id) {
+		
+     String str = "select p from Pupil pu right join fetch pu.SchoolClasses scs right join fetch scs.schoolClass sc where sc.id = :id";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("id", id);
+		
+		
+		return query.getResultList();
+		
 	}
 }

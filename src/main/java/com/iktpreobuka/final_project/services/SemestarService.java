@@ -11,5 +11,8 @@ public interface SemestarService {
 	Semestar addNew(Semestar newSemestar);
 	Semestar update(Long id, Semestar newSemestar);
 	Semestar delete(Long id);
+	boolean ifExists(String code);
+	Semestar findByCode(String code);
+	
 	
 }

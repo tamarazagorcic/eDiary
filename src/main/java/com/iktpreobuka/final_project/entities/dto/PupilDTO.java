@@ -9,9 +9,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -42,6 +40,8 @@ public class PupilDTO {
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
+	@JsonView(View.Admin.class)
+	private List<SchoolClassDTO> schoolClassDTO;
 	
 	@JsonIgnore
 	@JsonBackReference("pupilsclasses")
@@ -49,8 +49,24 @@ public class PupilDTO {
 	
 	
 	@JsonView(View.Private.class)
-	@JsonManagedReference("parentpupils")
-	private Parent parent;
+//	@JsonManagedReference("parentpupils")
+	private ParentDTO parent;
+	
+	@JsonView(View.Admin.class)
+	private UserDTO pupilUser;
+	
+	
+	
+	
+
+
+	public UserDTO getPupilUser() {
+		return pupilUser;
+	}
+
+	public void setPupilUser(UserDTO pupilUser) {
+		this.pupilUser = pupilUser;
+	}
 
 	public Long getId() {
 		return id;
@@ -100,12 +116,27 @@ public class PupilDTO {
 		this.schoolClasses = schoolClasses;
 	}
 
-	public Parent getParent() {
+	
+
+
+	
+
+
+
+	public ParentDTO getParent() {
 		return parent;
 	}
 
-	public void setParent(Parent parent) {
+	public void setParent(ParentDTO parent) {
 		this.parent = parent;
+	}
+
+	public List<SchoolClassDTO> getSchoolClassDTO() {
+		return schoolClassDTO;
+	}
+
+	public void setSchoolClassDTO(List<SchoolClassDTO> schoolClassDTO) {
+		this.schoolClassDTO = schoolClassDTO;
 	}
 
 	public PupilDTO() {
@@ -117,7 +148,7 @@ public class PupilDTO {
 			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
 			@NotNull(message = "JMBG must be provided.") @Pattern(regexp = "^[0-9]{13}$") String jmbg,
 			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
-			Parent parent) {
+			ParentDTO parent) {
 		super();
 		this.name = name;
 		this.surname = surname;
@@ -125,6 +156,43 @@ public class PupilDTO {
 		this.code = code;
 		this.parent = parent;
 	}
+
+	public PupilDTO(
+			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotNull(message = "JMBG must be provided.") @Pattern(regexp = "^[0-9]{13}$") String jmbg,
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			ParentDTO parent, List<SchoolClassDTO> schoolClassDTO) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.jmbg = jmbg;
+		this.code = code;
+		this.parent = parent;
+		this.schoolClassDTO = schoolClassDTO;
+	}
+
+	public PupilDTO(
+			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotNull(message = "JMBG must be provided.") @Pattern(regexp = "^[0-9]{13}$") String jmbg,
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			ParentDTO parent, UserDTO pupilUser) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.jmbg = jmbg;
+		this.code = code;
+		this.parent = parent;
+		this.pupilUser = pupilUser;
+	}
+
+	
+
+	
+
+	
+
 
 	
 	

@@ -1,18 +1,33 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Professor;
+import com.iktpreobuka.final_project.entities.ProfessorSubject;
+import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.repositories.ProfessorRepository;
+import com.iktpreobuka.final_project.repositories.ProfessorSubjectRepository;
 
 @Service
 public class ProfessorServiceImpl implements ProfessorService{
 
 	@Autowired
 	private ProfessorRepository professorRepo;
+	
+	@Autowired
+	private ProfessorSubjectRepository psRepo;
+	
+	@PersistenceContext
+	private EntityManager em;
 	
 	public Iterable<Professor> getAll() {
 		return professorRepo.findAll();
@@ -52,5 +67,30 @@ public class ProfessorServiceImpl implements ProfessorService{
 		return temp;
 	}
 	
+	public ProfessorSubject addNewPS(Professor newProfessor, Subject newSubject) {
+		
+		ProfessorSubject ps = new ProfessorSubject(newProfessor,newSubject);
+
+		return psRepo.save(ps);
+	}
 	
+//	public List<Subject> findSubjectsByProfessor(Long professor){
+//		
+//		return psRepo.findByProfessor(professor);
+//	}
+//	
+
+	
+	@SuppressWarnings("unchecked")
+	public List<Subject> findSubjectByProff(Long id){
+		
+		String str = "select s from Subject s right join fetch s.professors ps right join fetch ps.professor p where p.id = :id";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("id", id);
+		
+		
+		return query.getResultList();
+	}
+
 }

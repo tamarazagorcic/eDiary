@@ -103,6 +103,20 @@ public class Semestar {
 	public Semestar() {
 		super();
 	}
+	public Semestar(String name, Integer value, String code) {
+		super();
+		this.name = name;
+		this.value = value;
+		this.code = code;
+	}
+	public Semestar(String name, Integer value, LocalDate startDate, LocalDate endDate, String code) {
+		super();
+		this.name = name;
+		this.value = value;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.code = code;
+	}
 	
 	
 }

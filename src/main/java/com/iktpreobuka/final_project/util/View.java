@@ -9,4 +9,6 @@ public class View {
 	public static class Private extends Public {}
 	
 	public static class Admin extends Private {}
+	
+	//public static class Admin extends Professor {}
 }
