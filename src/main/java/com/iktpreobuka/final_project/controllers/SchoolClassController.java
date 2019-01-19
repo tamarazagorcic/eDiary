@@ -361,7 +361,7 @@ public class SchoolClassController {
 			
 			Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor.get(), subject.get());
 			
-			if (sc.isPresent() && professorSubject.isPresent()) {
+			if (sc.isPresent() && professorSubject.isPresent() && !scService.ifExistsConectonProfessorSubjectClass(professorSubject.get(), sc.get())) {
 				
 
 				ProfessorSubjectClass professorSubjectClass = new ProfessorSubjectClass(professorSubject.get(),sc.get());

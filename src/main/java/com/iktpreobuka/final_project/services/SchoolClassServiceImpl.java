@@ -148,5 +148,13 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		}else return false;
 	}
 
+	@SuppressWarnings("static-access")
+	public boolean ifExistsConectonProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc) {
+		Optional<ProfessorSubjectClass> psc = pscRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
+		if( psc.isPresent()) {
+			return true;
+		}else return false;
+	}
+	
 	
 }

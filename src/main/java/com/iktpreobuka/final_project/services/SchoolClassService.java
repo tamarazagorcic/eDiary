@@ -3,6 +3,7 @@ package com.iktpreobuka.final_project.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
@@ -20,5 +21,6 @@ public interface SchoolClassService {
 	List<SchoolClass> findClassesByPupils(Long id);
 	 ProfessorSubjectClass addSubjectToClass(ProfessorSubjectClass professorSubjectClass);
 	 boolean ifExistsConectonSchoolClassPupil(SchoolClass sc, Pupil pupil);
+	 boolean ifExistsConectonProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc);
 	 
 }
