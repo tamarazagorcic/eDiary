@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +24,22 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
+import com.iktpreobuka.final_project.entities.Professor;
+import com.iktpreobuka.final_project.entities.ProfessorSubject;
+import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
+import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
 import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
 import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
+import com.iktpreobuka.final_project.services.ProfessorService;
 import com.iktpreobuka.final_project.services.PupilService;
 import com.iktpreobuka.final_project.services.SchoolClassService;
 import com.iktpreobuka.final_project.services.SemestarService;
+import com.iktpreobuka.final_project.services.SubjectService;
 import com.iktpreobuka.final_project.util.SchoolClassCustomValidator;
 import com.iktpreobuka.final_project.util.SemestarCustomValidator;
 import com.iktpreobuka.final_project.util.View;
@@ -56,6 +63,11 @@ public class SchoolClassController {
 
 	@Autowired
 	private SemestarService smService;
+	
+	@Autowired
+	private ProfessorService professorService;
+	@Autowired
+	private SubjectService subjectService;
 
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
@@ -299,5 +311,76 @@ public class SchoolClassController {
 		}
 
 	}
+	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.PUT, value = "/{idSc}/pupil/{idP}")
+	public ResponseEntity<?> conectionProfessorSubject(@PathVariable Long idSc, @PathVariable Long idP) {
 
+		try {
+			Optional<SchoolClass> sc = scService.findById(idSc);
+			Optional<Pupil> pupil = pService.findById(idP);
+			if (sc.isPresent() && pupil.isPresent() && !scService.ifExistsConectonSchoolClassPupil(sc.get(), pupil.get())) {
+				
+
+				scService.addNewPC(sc.get().getId(), pupil.get().getId());
+				//professorService.update(id, professor.get());
+				
+				
+				
+				List<PupilDTO> list = new ArrayList<>();
+				for (Pupil temp : pService.findPupilsByClass(sc.get().getId())) {
+					PupilDTO pupilDTO = new PupilDTO(temp.getName(),temp.getSurname(),temp.getJmbg(),temp.getCode());
+					list.add(pupilDTO);
+				}
+				
+
+				Semestar sm = sc.get().getSemestar();
+				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(), sm.getCode());
+				
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
+						smDTO,list);
+				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil or School class are not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	
+	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}/class/{idSC}")
+	public ResponseEntity<?> conectionProfessorSubjectClass(@PathVariable Long idP,@PathVariable Long idS, @PathVariable Long idSC) {
+
+		try {
+			Optional<SchoolClass> sc = scService.findById(idSC);
+			Optional<Professor> professor = professorService.findById(idP);
+			Optional<Subject> subject = subjectService.findById(idS);
+			
+			Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor.get(), subject.get());
+			
+			if (sc.isPresent() && professorSubject.isPresent()) {
+				
+
+				ProfessorSubjectClass professorSubjectClass = new ProfessorSubjectClass(professorSubject.get(),sc.get());
+			scService.addSubjectToClass(professorSubjectClass);	
+				
+				
+				
+
+				Semestar sm = sc.get().getSemestar();
+				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(), sm.getCode());
+				
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
+						smDTO);
+				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Professor or subject or school class are not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

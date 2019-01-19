@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iktpreobuka.final_project.enumerations.EMarkValue;
@@ -34,6 +37,8 @@ public class Mark {
 	
 	private EMarkValue value;
 	
+	@Version
+	@ColumnDefault("0")
 	private Integer version;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone="Europe/Belgrade")
 	private LocalDate date;

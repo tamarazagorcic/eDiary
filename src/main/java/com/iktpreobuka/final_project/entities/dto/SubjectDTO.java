@@ -27,6 +27,7 @@ public class SubjectDTO {
 	@JsonIgnore
 	private List<ProfessorDTO> professors;
 	
+	
 	public Long getId() {
 		return id;
 	}

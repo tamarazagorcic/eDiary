@@ -81,6 +81,16 @@ public class Pupil extends Person{
 		this.code = code;
 		this.parent = parent;
 	}
+	public Pupil(String name, String surname,String jmbg, String code, Parent parent, User user_id) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.jmbg = jmbg;
+		this.code = code;
+		this.parent = parent;
+		this.user_id = user_id;
+	}
+	
 	
 	
 	

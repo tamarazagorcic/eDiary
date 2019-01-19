@@ -24,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
+import com.iktpreobuka.final_project.entities.dto.RoleDTO;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
 import com.iktpreobuka.final_project.services.UserService;
@@ -145,7 +147,11 @@ public class PupilController {
 			//parentValidator.validate(newPupil.getParent(), result);
 			
 		}
+		
+		User pupilUser = new User (newPupil.getPupilUser().getEmail(),newPupil.getPupilUser().getPassword(),newPupil.getPupilUser().getUsername());
 
+		User thisUser = userService.addNewUser(pupilUser, "pupil");
+		
 		ParentDTO parentDTO = newPupil.getParent();
 		
 		if(parentService.ifExists(parentDTO.getCode())) {
@@ -153,21 +159,29 @@ public class PupilController {
 			
 			
 			Pupil newPupilEntity = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
-					parent);
+					parent,thisUser);
 
 			pupilService.addNew(newPupilEntity);
 		}else {
+			User parentUser = new User(newPupil.getParent().getParentUser().getEmail(),newPupil.getParent().getParentUser().getPassword(),
+					newPupil.getParent().getParentUser().getUsername());
 			
-			Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode());
+			User thisUserParent = userService.addNewUser(parentUser, "parent");
+			Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode(),thisUserParent);
 			parentService.addNewParent(parent);
 			
 			Pupil newPupilE = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
-					parent);
+					parent,thisUser);
 			
 			pupilService.addNew(newPupilE);
+			
 		}
+	
 		
-
+		newPupil.getParent().getParentUser().getRole().setName("parent");
+		RoleDTO roleDTO = new RoleDTO(thisUser.getRole().getName());
+		
+		newPupil.getPupilUser().setRole(roleDTO);
 
 		return new ResponseEntity<>(newPupil, HttpStatus.OK);
 	}

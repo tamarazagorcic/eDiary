@@ -92,5 +92,29 @@ public class ProfessorServiceImpl implements ProfessorService{
 		
 		return query.getResultList();
 	}
+	
+//	public ProfessorSubject fingConectionProfSubject(Long idP, Long idS) {
+//		
+//		String str = "select ps from ProfessorSubject ps right join fetch ps.professor p where p.id = :idP"
+//				+ "and ps.subject s where s.id = :idS";
+//		
+//		Query query = em.createQuery(str);
+//		query.setParameter("id", idP);
+//		query.setParameter("id", idS);
+//		
+//		return (ProfessorSubject) query.getSingleResult();
+//		
+//	}
+	
+	public Optional<ProfessorSubject> findByProfessorSubject(Professor professor, Subject subject) {
+		return psRepo.findByProfessorAndSubject(professor, subject);
+	}
 
+	@SuppressWarnings("static-access")
+	public boolean ifExistsConectonProfessorSubject(Professor professor, Subject subject) {
+		Optional<ProfessorSubject> professorSubject = psRepo.findByProfessorAndSubject(professor, subject);
+		if( professorSubject.isPresent()) {
+			return true;
+		}else return false;
+	}
 }

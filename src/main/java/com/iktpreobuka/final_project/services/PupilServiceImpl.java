@@ -71,7 +71,7 @@ public class PupilServiceImpl implements PupilService{
 	
 	public List<Pupil> findPupilsByClass(Long id) {
 		
-     String str = "select p from Pupil pu right join fetch pu.SchoolClasses scs right join fetch scs.schoolClass sc where sc.id = :id";
+     String str = "select p from Pupil p right join fetch p.schoolClasses scs right join fetch scs.schoolClass sc where sc.id = :id";
 		
 		Query query = em.createQuery(str);
 		query.setParameter("id", id);

@@ -131,7 +131,8 @@ public class ParentController {
 		
 		User thisUser = userService.addNewUser(parentUser, "parent");
 		
-		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),newParent.getCode(),thisUser );
+		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),
+				newParent.getCode(),thisUser );
 		parentService.addNewParent(newParentEntity);
 		
 		

@@ -256,7 +256,7 @@ public class ProfessorController {
 		try {
 			Optional<Professor> professor = professorService.findById(idP);
 			Optional<Subject> subject = subjectService.findById(idS);
-			if (professor.isPresent() && subject.isPresent()) {
+			if (professor.isPresent() && subject.isPresent() && !professorService.ifExistsConectonProfessorSubject(professor.get(), subject.get())) {
 				
 
 				professorService.addNewPS(professor.get(), subject.get());

@@ -31,16 +31,16 @@ public class SchoolClassDTO {
 	@NotNull(message = "Grade must be provided.")
 	private EGrade grade;
 	
+	@JsonView(View.Public.class)
+	private SemestarDTO semestarDTO;
+	
+	@JsonView(View.Public.class)
+	private List<PupilDTO> pupilsAttendingClass;
+	
 	
 //	@JsonView(View.Public.class)
 //	//@JsonManagedReference("classsemestar")
 //	private Semestar semestar;
-		
-	@JsonView(View.Public.class)
-	//@JsonManagedReference("classsemestar")
-	private SemestarDTO semestarDTO;
-	
-
 	
 	@JsonIgnore
 	@JsonBackReference("classpupils")
@@ -104,6 +104,15 @@ public class SchoolClassDTO {
 		this.semestarDTO = semestarDTO;
 	}
 
+	
+	public List<PupilDTO> getPupilsAttendingClass() {
+		return pupilsAttendingClass;
+	}
+
+	public void setPupilsAttendingClass(List<PupilDTO> pupilsAttendingClass) {
+		this.pupilsAttendingClass = pupilsAttendingClass;
+	}
+
 	public SchoolClassDTO() {
 		super();
 	}
@@ -116,6 +125,19 @@ public class SchoolClassDTO {
 		this.grade = grade;
 		this.semestarDTO = semestarDTO;
 	}
+
+	public SchoolClassDTO(
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO,
+			List<PupilDTO> pupilsAttendingClass) {
+		super();
+		this.code = code;
+		this.grade = grade;
+		this.semestarDTO = semestarDTO;
+		this.pupilsAttendingClass = pupilsAttendingClass;
+	}
+
+	
 
 
 

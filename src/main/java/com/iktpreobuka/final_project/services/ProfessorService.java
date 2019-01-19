@@ -17,5 +17,8 @@ public interface ProfessorService {
 	 ProfessorSubject addNewPS(Professor newProfessor, Subject newSubject);
 	// List<Subject> findSubjectsByProfessor(Professor professor);
 	 List<Subject> findSubjectByProff(Long id);
+	 //ProfessorSubject fingConectionProfSubject(Long idP, Long idS);
+	 Optional<ProfessorSubject> findByProfessorSubject(Professor professor, Subject subject);
+	 boolean ifExistsConectonProfessorSubject(Professor professor, Subject subject);
 	 
 }
