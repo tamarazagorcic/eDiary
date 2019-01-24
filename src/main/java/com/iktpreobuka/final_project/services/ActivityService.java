@@ -11,4 +11,6 @@ public interface ActivityService {
 	Activity addNewActivity(Activity newActivity);
 	Activity updateActivity(Long id, Activity newActivity);
 	Activity deleteActivity(Long id);
+	Activity findActivityByName(String name);
+	
 }

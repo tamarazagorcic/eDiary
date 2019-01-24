@@ -40,6 +40,7 @@ public class Mark {
 	@Version
 	@ColumnDefault("0")
 	private Integer version;
+	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone="Europe/Belgrade")
 	private LocalDate date;
 	
@@ -87,9 +88,26 @@ public class Mark {
 		this.date = date;
 	}
 	
+	public Activity getActivity() {
+		return activity;
+	}
+	public void setActivity(Activity activity) {
+		this.activity = activity;
+	}
 	public Mark() {
 		super();
 	}
+	public Mark(PupilsInClass pupil, ProfessorSubjectClass professor, EMarkValue value, LocalDate date,
+			Activity activity) {
+		super();
+		this.pupil = pupil;
+		this.professor = professor;
+		this.value = value;
+		this.date = date;
+		this.activity = activity;
+	}
+	
+	
 	
 	
 }

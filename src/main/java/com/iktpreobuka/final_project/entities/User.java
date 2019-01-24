@@ -22,11 +22,14 @@ public class User {
 	@Id
 	@GeneratedValue
 	private Long id;
-	@Column
+	
+	@Column( name= "email")
 	private String email;
-	@Column
+	
+	@Column( name= "password")
 	private String password;
-	@Column(unique = true)
+	
+	@Column(name = "username" ,unique = true)
 	private String username;
 	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

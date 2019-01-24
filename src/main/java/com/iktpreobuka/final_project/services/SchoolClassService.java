@@ -22,5 +22,9 @@ public interface SchoolClassService {
 	 ProfessorSubjectClass addSubjectToClass(ProfessorSubjectClass professorSubjectClass);
 	 boolean ifExistsConectonSchoolClassPupil(SchoolClass sc, Pupil pupil);
 	 boolean ifExistsConectonProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc);
+	 Optional<ProfessorSubjectClass> findByProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc);
+	 Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil);
+	 
+	 
 	 
 }

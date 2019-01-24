@@ -6,4 +6,5 @@ import com.iktpreobuka.final_project.entities.Activity;
 
 public interface ActivityRepository extends CrudRepository<Activity, Long> {
 
+	Activity findByName(String name);
 }

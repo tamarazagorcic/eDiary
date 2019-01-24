@@ -137,6 +137,14 @@ public class SchoolClassDTO {
 		this.pupilsAttendingClass = pupilsAttendingClass;
 	}
 
+	public SchoolClassDTO(
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade) {
+		super();
+		this.code = code;
+		this.grade = grade;
+	}
+
 	
 
 

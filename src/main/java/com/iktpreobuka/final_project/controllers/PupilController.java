@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -64,7 +65,7 @@ public class PupilController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	
+	@Secured("admin")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllPupilsPrivate() {
@@ -89,7 +90,7 @@ public class PupilController {
 		}
 
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllPupilsAdmin() {
@@ -115,7 +116,7 @@ public class PupilController {
 
 	}
 	
-
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByPupilId(@PathVariable Long id) {
@@ -136,7 +137,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewPupil(@Valid @RequestBody PupilDTO newPupil, BindingResult result) {
@@ -150,7 +151,7 @@ public class PupilController {
 		
 		User pupilUser = new User (newPupil.getPupilUser().getEmail(),newPupil.getPupilUser().getPassword(),newPupil.getPupilUser().getUsername());
 
-		User thisUser = userService.addNewUser(pupilUser, "pupil");
+		User thisUser = userService.addNewUser(pupilUser, "ROLE_PUPIL");
 		
 		ParentDTO parentDTO = newPupil.getParent();
 		
@@ -187,7 +188,7 @@ public class PupilController {
 	}
 	
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updatePupil(@Valid @RequestBody PupilDTO newPupil,@PathVariable Long id, 
@@ -228,7 +229,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByPupilId(@PathVariable Long id) {

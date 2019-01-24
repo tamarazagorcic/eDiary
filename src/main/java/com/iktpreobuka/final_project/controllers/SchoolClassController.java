@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -78,6 +79,7 @@ public class SchoolClassController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
+	@Secured("admin")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllSCPrivate() {
@@ -102,6 +104,7 @@ public class SchoolClassController {
 
 	}
 
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSCAdmin() {
@@ -127,6 +130,7 @@ public class SchoolClassController {
 
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySCId(@PathVariable Long id) {
@@ -147,6 +151,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, BindingResult result) {
@@ -183,7 +188,7 @@ public class SchoolClassController {
 	}
 
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, @PathVariable Long id,
@@ -224,6 +229,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySCId(@PathVariable Long id) {
@@ -246,6 +252,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
 	public ResponseEntity<?> getAllSchoolClasesByPupil(@PathVariable Long id) {
@@ -275,6 +282,7 @@ public class SchoolClassController {
 
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupilandclass/{id}")
 	public ResponseEntity<?> getAllSchoolClasesByPupilId(@PathVariable Long id) {
@@ -312,6 +320,7 @@ public class SchoolClassController {
 
 	}
 	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idSc}/pupil/{idP}")
 	public ResponseEntity<?> conectionProfessorSubject(@PathVariable Long idSc, @PathVariable Long idP) {
@@ -349,7 +358,7 @@ public class SchoolClassController {
 	}
 
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}/class/{idSC}")
 	public ResponseEntity<?> conectionProfessorSubjectClass(@PathVariable Long idP,@PathVariable Long idS, @PathVariable Long idSC) {

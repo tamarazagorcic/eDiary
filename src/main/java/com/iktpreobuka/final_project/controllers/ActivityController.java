@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -47,6 +48,7 @@ public class ActivityController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
+	@Secured("admin")
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/public")
 	public ResponseEntity<?> getAllActivitiesPublic() {
@@ -67,6 +69,7 @@ public class ActivityController {
 		}
 
 	}
+	@Secured("admin")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllActivitiesPrivate() {
@@ -87,7 +90,7 @@ public class ActivityController {
 		}
 
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllActivitiesAdmin() {
@@ -109,6 +112,7 @@ public class ActivityController {
 
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByActivityId(@PathVariable Long id) {
@@ -126,6 +130,7 @@ public class ActivityController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewActivity(@Valid @RequestBody ActivityDTO newActivity, BindingResult result) {
@@ -142,6 +147,7 @@ public class ActivityController {
 		return new ResponseEntity<>(newActivity, HttpStatus.OK);
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateActivity(@Valid @RequestBody ActivityDTO newActivity,@PathVariable Long id, 
@@ -170,6 +176,7 @@ public class ActivityController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByActivityId(@PathVariable Long id) {

@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -54,7 +55,7 @@ public class SubjectController {
 	}
 	
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSubjectsAdmin() {
@@ -76,7 +77,7 @@ public class SubjectController {
 
 	}
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySubjectId(@PathVariable Long id) {
@@ -94,6 +95,7 @@ public class SubjectController {
 		}
 	}
 	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSubject(@Valid @RequestBody SubjectDTO newSubject, BindingResult result) {
@@ -110,6 +112,7 @@ public class SubjectController {
 		return new ResponseEntity<>(newSubject, HttpStatus.OK);
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateActivity(@Valid @RequestBody SubjectDTO newSubject,@PathVariable Long id, 
@@ -137,7 +140,7 @@ public class SubjectController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySubjectId(@PathVariable Long id) {

@@ -199,6 +199,16 @@ public class PupilDTO {
 		this.code = code;
 	}
 
+	public PupilDTO(
+			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+	}
+
 	
 
 	

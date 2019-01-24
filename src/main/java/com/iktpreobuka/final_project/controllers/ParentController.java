@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -54,7 +55,7 @@ public class ParentController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	
+	@Secured("ROLE_PUPIL")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllParentsPrivate() {
@@ -75,7 +76,7 @@ public class ParentController {
 		}
 
 	}
-	
+	@Secured("ROLE_PARENT")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllParentsAdmin() {
@@ -96,7 +97,7 @@ public class ParentController {
 		}
 
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByParentId(@PathVariable Long id) {
@@ -114,7 +115,7 @@ public class ParentController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewParent(@Valid @RequestBody ParentDTO newParent, BindingResult result) {
@@ -129,7 +130,7 @@ public class ParentController {
 		User parentUser = new User(newParent.getParentUser().getEmail(),newParent.getParentUser().getPassword(),
 				newParent.getParentUser().getUsername());
 		
-		User thisUser = userService.addNewUser(parentUser, "parent");
+		User thisUser = userService.addNewUser(parentUser, "ROLE_PARENT");
 		
 		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),
 				newParent.getCode(),thisUser );
@@ -145,7 +146,7 @@ public class ParentController {
 	}
 	
 	
-	
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateParent(@Valid @RequestBody ParentDTO newParent,@PathVariable Long id, 
@@ -176,6 +177,7 @@ public class ParentController {
 		}
 	}
 
+	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByParentId(@PathVariable Long id) {

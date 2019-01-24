@@ -156,5 +156,13 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		}else return false;
 	}
 	
+	public Optional<ProfessorSubjectClass> findByProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc) {
+		return pscRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
+	}
+	
+	public Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil){
+		return pcRepo.findByPupilAndSchoolClass(pupil, sc);
+	}
+	
 	
 }

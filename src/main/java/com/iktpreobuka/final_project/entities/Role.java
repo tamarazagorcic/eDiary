@@ -20,9 +20,10 @@ public class Role {
 
 	@Id
 	@GeneratedValue
+	@Column( name= "role_id")
 	private Long id;
 	
-	@Column(unique = true)
+	@Column(name = "role_name", unique = true)
 	private String name;
 	
 	@OneToMany(mappedBy = "role", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

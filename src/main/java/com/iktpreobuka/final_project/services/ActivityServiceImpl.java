@@ -53,4 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
 		return temp;
 	}
 
+	public Activity findActivityByName(String name) {
+		return activityRepo.findByName(name);
+	}
 }
