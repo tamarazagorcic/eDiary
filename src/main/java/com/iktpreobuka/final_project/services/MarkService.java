@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.iktpreobuka.final_project.entities.Mark;
+import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 
 public interface MarkService {
@@ -14,6 +15,9 @@ public interface MarkService {
 	 Optional<Mark> findById(Long id);
 	 Iterable<Mark> getAllMarks();
 	 List<Mark> findByPupilInClass(PupilsInClass pc);
+	 List<Mark> findByPupilAndSubject(PupilsInClass pc, ProfessorSubjectClass psc);
+	 List<Mark> findByClassAndSubject( ProfessorSubjectClass psc);
+	 
 	 
 	 
 }

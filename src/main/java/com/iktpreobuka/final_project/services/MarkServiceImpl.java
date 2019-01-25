@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Activity;
 import com.iktpreobuka.final_project.entities.Mark;
+import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.repositories.MarkRepository;
 
@@ -61,4 +62,11 @@ public class MarkServiceImpl implements MarkService{
 		return markRepo.findByPupil(pc);
 	}
 
+	public List<Mark> findByPupilAndSubject(PupilsInClass pc, ProfessorSubjectClass psc){
+		return markRepo.findByPupilAndProfessor(pc, psc);
+	}
+	
+	public List<Mark> findByClassAndSubject( ProfessorSubjectClass psc){
+		return markRepo.findByProfessor(psc);
+	}
 }
