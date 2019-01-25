@@ -89,7 +89,7 @@ public class SchoolClassController {
 				Semestar sm = sc.getSemestar();
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getCode());
 
-				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO);
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
@@ -115,7 +115,7 @@ public class SchoolClassController {
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getStartDate(), sm.getEndDate(),
 						sm.getCode());
 
-				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO);
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
@@ -141,7 +141,7 @@ public class SchoolClassController {
 				Semestar sm = sc.get().getSemestar();
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
 
-				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(), smDTO);
+				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(), smDTO, sc.get().getName());
 				return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
@@ -168,7 +168,7 @@ public class SchoolClassController {
 
 			Semestar semestar = smService.findByCode(newSchoolClass.getSemestarDTO().getCode());
 			
-				SchoolClass newSCE = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(),
+				SchoolClass newSCE = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(),newSchoolClass.getName(),
 						semestar);
 
 				scService.addNew(newSCE);
@@ -178,7 +178,7 @@ public class SchoolClassController {
 			Semestar sm = new Semestar(smDTO.getName(), smDTO.getValue(),  smDTO.getStartDate(), smDTO.getEndDate(),smDTO.getCode());
 			smService.addNew(sm);
 			
-			SchoolClass newSCEntity = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(), sm);
+			SchoolClass newSCEntity = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(),newSchoolClass.getName(), sm);
 
 			scService.addNew(newSCEntity);
 			
@@ -205,6 +205,7 @@ public class SchoolClassController {
 			if (sc.isPresent()) {
 				sc.get().setCode(newSchoolClass.getCode());
 				sc.get().setGrade(newSchoolClass.getGrade());
+				sc.get().setName(newSchoolClass.getName());
 				SemestarDTO smDTO = newSchoolClass.getSemestarDTO();
 				
 				if (smService.ifExists(smDTO.getCode())) {
@@ -241,7 +242,7 @@ public class SchoolClassController {
 				Semestar sm = sc.get().getSemestar();
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
 				
-				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(),smDTO);
+				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(),smDTO,sc.get().getName());
 				scService.delete(id);
 				return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
 			}
@@ -264,7 +265,7 @@ public class SchoolClassController {
 				for (SchoolClass sc : scService.findClassesByPupils(id)) {
 					Semestar sm = sc.getSemestar();
 					SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
-					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO);
+					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 					list.add(schoolClassDTO);
 				}
 
@@ -298,7 +299,7 @@ public class SchoolClassController {
 					Semestar sm = sc.getSemestar();
 					SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getCode());
 
-					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO);
+					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO, sc.getName());
 
 					list.add(schoolClassDTO);
 				}
@@ -347,7 +348,7 @@ public class SchoolClassController {
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(), sm.getCode());
 				
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
-						smDTO,list);
+						smDTO,sc.get().getName(),list);
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil or School class are not present"), HttpStatus.BAD_REQUEST);
@@ -383,7 +384,7 @@ public class SchoolClassController {
 				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(), sm.getCode());
 				
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
-						smDTO);
+						smDTO, sc.get().getName());
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor or subject or school class are not present"), HttpStatus.BAD_REQUEST);

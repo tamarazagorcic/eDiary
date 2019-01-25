@@ -11,4 +11,5 @@ import com.iktpreobuka.final_project.entities.SchoolClass;
 public interface PupilsInClassRepository extends CrudRepository<PupilsInClass, Long> {
 
 	Optional<PupilsInClass> findByPupilAndSchoolClass(Pupil pupil, SchoolClass schoolClass);
+	SchoolClass findByPupil(Pupil pupil);
 }

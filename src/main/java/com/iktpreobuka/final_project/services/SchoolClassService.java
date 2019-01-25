@@ -8,6 +8,7 @@ import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Semestar;
 
 public interface SchoolClassService {
 
@@ -24,7 +25,8 @@ public interface SchoolClassService {
 	 boolean ifExistsConectonProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc);
 	 Optional<ProfessorSubjectClass> findByProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc);
 	 Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil);
-	 
+	 List<SchoolClass> findBySemestar(Semestar semestar);
+	 SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar);
 	 
 	 
 }

@@ -2,6 +2,7 @@ package com.iktpreobuka.final_project.entities.dto;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -35,6 +36,9 @@ public class SchoolClassDTO {
 	private SemestarDTO semestarDTO;
 	
 	@JsonView(View.Public.class)
+	private String name;
+	
+	@JsonView(View.Public.class)
 	private List<PupilDTO> pupilsAttendingClass;
 	
 	
@@ -52,6 +56,14 @@ public class SchoolClassDTO {
 
 	
 
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public Long getId() {
 		return id;
@@ -136,6 +148,19 @@ public class SchoolClassDTO {
 		this.semestarDTO = semestarDTO;
 		this.pupilsAttendingClass = pupilsAttendingClass;
 	}
+	
+
+	public SchoolClassDTO(
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO, String name,
+			List<PupilDTO> pupilsAttendingClass) {
+		super();
+		this.code = code;
+		this.grade = grade;
+		this.semestarDTO = semestarDTO;
+		this.name = name;
+		this.pupilsAttendingClass = pupilsAttendingClass;
+	}
 
 	public SchoolClassDTO(
 			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
@@ -143,6 +168,27 @@ public class SchoolClassDTO {
 		super();
 		this.code = code;
 		this.grade = grade;
+	}
+	
+	
+
+	public SchoolClassDTO(
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, String name) {
+		super();
+		this.code = code;
+		this.grade = grade;
+		this.name = name;
+	}
+
+	public SchoolClassDTO(
+			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO, String name) {
+		super();
+		this.code = code;
+		this.grade = grade;
+		this.semestarDTO = semestarDTO;
+		this.name = name;
 	}
 
 	

@@ -48,6 +48,10 @@ public class SemestarDTO {
 	@Size(min=2, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
+	@JsonView(View.Admin.class)
+	private boolean active;
+	
+	
 	@JsonIgnore
 	@JsonBackReference("classsemestar")
 	private List<SchoolClassDTO> classes;
@@ -126,6 +130,16 @@ public class SemestarDTO {
 	}
 
 
+	public boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+
 	public SemestarDTO() {
 		super();
 	}
@@ -158,6 +172,23 @@ public class SemestarDTO {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.code = code;
+	}
+
+
+	public SemestarDTO(
+			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 10, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotNull(message = "Value must be provided.") @Range(min = 1, max = 2) Integer value,
+			@NotNull(message = "Start date must be provided.") LocalDate startDate,
+			@NotNull(message = "End date must be provided.") LocalDate endDate,
+			@NotNull(message = "Code must be provided.") @Size(min = 2, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			boolean active) {
+		super();
+		this.name = name;
+		this.value = value;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.code = code;
+		this.active = active;
 	}
 	
 	

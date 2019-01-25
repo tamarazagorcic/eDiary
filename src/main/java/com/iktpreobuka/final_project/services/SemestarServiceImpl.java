@@ -54,12 +54,14 @@ public class SemestarServiceImpl implements SemestarService{
 			newSemestar.setName(str);
 			
 		}
+		
 		temp.setName(newSemestar.getName());
 		temp.setCode(newSemestar.getCode());
 		temp.setStartDate(newSemestar.getStartDate());
 		temp.setEndDate(newSemestar.getEndDate());
 		temp.setValue(newSemestar.getValue());
 		temp.setVersion(newSemestar.getVersion());
+		temp.setActive(newSemestar.isActive());
 		
 		
 		
@@ -95,4 +97,10 @@ public class SemestarServiceImpl implements SemestarService{
 //		return semestarRepo.findByCode(code).get();
 //		
 //	}
+	
+	public Semestar findIfActive(boolean active) {
+		
+		return semestarRepo.findByActive(active);
+	}
+	
 }

@@ -1,8 +1,10 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.iktpreobuka.final_project.entities.Mark;
+import com.iktpreobuka.final_project.entities.PupilsInClass;
 
 public interface MarkService {
 
@@ -11,5 +13,7 @@ public interface MarkService {
 	 Mark addNewMark(Mark newMark);
 	 Optional<Mark> findById(Long id);
 	 Iterable<Mark> getAllMarks();
+	 List<Mark> findByPupilInClass(PupilsInClass pc);
+	 
 	 
 }

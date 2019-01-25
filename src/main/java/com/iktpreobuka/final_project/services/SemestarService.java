@@ -13,6 +13,6 @@ public interface SemestarService {
 	Semestar delete(Long id);
 	boolean ifExists(String code);
 	Semestar findByCode(String code);
-	
+	Semestar findIfActive(boolean active);
 	
 }

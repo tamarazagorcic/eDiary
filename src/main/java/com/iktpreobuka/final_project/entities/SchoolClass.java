@@ -39,6 +39,10 @@ public class SchoolClass {
 	@Column
 	private EGrade grade;
 	
+	@Column
+	private String name;
+	
+	
 	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "semestar")
@@ -85,6 +89,12 @@ public class SchoolClass {
 	}
 	
 	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	public SchoolClass() {
 		super();
 	}
@@ -101,10 +111,19 @@ public class SchoolClass {
 	public void setProfessors_subjects(List<ProfessorSubjectClass> professors_subjects) {
 		this.professors_subjects = professors_subjects;
 	}
+	
+	
 	public SchoolClass(String code, EGrade grade, Semestar semestar) {
 		super();
 		this.code = code;
 		this.grade = grade;
+		this.semestar = semestar;
+	}
+	public SchoolClass(String code, EGrade grade, String name, Semestar semestar) {
+		super();
+		this.code = code;
+		this.grade = grade;
+		this.name = name;
 		this.semestar = semestar;
 	}
 

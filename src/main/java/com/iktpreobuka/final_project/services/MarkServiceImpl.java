@@ -1,5 +1,6 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Activity;
 import com.iktpreobuka.final_project.entities.Mark;
+import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.repositories.MarkRepository;
 
 @Service
@@ -55,5 +57,8 @@ public class MarkServiceImpl implements MarkService{
 		return temp;
 	}
 	
+	public List<Mark> findByPupilInClass(PupilsInClass pc){
+		return markRepo.findByPupil(pc);
+	}
 
 }

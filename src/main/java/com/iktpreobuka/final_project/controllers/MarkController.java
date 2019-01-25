@@ -31,6 +31,7 @@ import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
 import com.iktpreobuka.final_project.entities.dto.MarkDTO;
@@ -45,6 +46,7 @@ import com.iktpreobuka.final_project.services.MarkService;
 import com.iktpreobuka.final_project.services.ProfessorService;
 import com.iktpreobuka.final_project.services.PupilService;
 import com.iktpreobuka.final_project.services.SchoolClassService;
+import com.iktpreobuka.final_project.services.SemestarService;
 import com.iktpreobuka.final_project.services.SubjectService;
 import com.iktpreobuka.final_project.util.MarkCustomValidator;
 import com.iktpreobuka.final_project.util.View;
@@ -73,6 +75,10 @@ public class MarkController {
 	
 	@Autowired
 	private ActivityService activityService;
+	
+	@Autowired
+	private SemestarService semestarService;
+	
 	
 	@Autowired
 	private EmailService emailService;
@@ -186,6 +192,7 @@ public class MarkController {
 		Activity activity = activityService.findActivityByName(newMark.getActivity().getName());
 		LocalDate date = LocalDate.now();
 		
+	
 		if(professor.isPresent() && subject.isPresent()&& sc.isPresent()&& pupil.isPresent() &&
 				professorSubject.isPresent() && professorSubjectClass.isPresent() && pupilsInClass.isPresent()) {
 			
@@ -303,6 +310,56 @@ public class MarkController {
 				
 				markService.deleteMark(id);
 				return new ResponseEntity<MarkDTO>(markDTO, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Activity not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
+	public ResponseEntity<?> findMarksByPupilId(@PathVariable Long id) {
+
+		try {
+			Optional<Pupil> pupil = pupilService.findById(id);
+			Semestar semestar = semestarService.findIfActive(true);
+			SchoolClass sc = scService.findClassByPupilandSemestar(id, semestar);
+			
+			Optional<PupilsInClass> pc = scService.findPupilsInClass(sc, pupil.get());
+			if (pupil.isPresent() && pc.isPresent()) {
+				
+				
+				List<MarkDTO> marks = new ArrayList<>();
+				for (Mark mark : markService.findByPupilInClass(pc.get())) {
+					
+					Activity activity = mark.getActivity();
+					ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
+					
+					Professor professor = mark.getProfessor().getProfessorSubject().getProfessor();
+					ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),professor.getSurname(),professor.getCode());
+					
+					Subject subject = mark.getProfessor().getProfessorSubject().getSubject();
+					SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
+					
+					
+					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),pupil.get().getCode());
+					
+					
+					SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(),sc.getName());
+					
+
+					MarkDTO markDTO = new MarkDTO(professorDTO,pupilDTO,subjectDTO,scDTO,acDTO,mark.getValue(),mark.getDate());
+					
+					marks.add(markDTO);
+				}
+				
+				if (marks.size() != 0) {
+				
+				return new ResponseEntity<Iterable<MarkDTO>>(marks, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Activity not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {

@@ -30,7 +30,7 @@ import com.iktpreobuka.final_project.util.SemestarCustomValidator;
 import com.iktpreobuka.final_project.util.View;
 
 @RestController
-@RequestMapping(path = "/project/semstar")
+@RequestMapping(path = "/project/semestar")
 public class SemestarController {
 
 	
@@ -57,7 +57,7 @@ public class SemestarController {
 			List<SemestarDTO> list = new ArrayList<>();
 			for (Semestar semestar : semestarService.getAll()) {
 				SemestarDTO semestarDTO = new SemestarDTO(semestar.getName(), semestar.getValue(), 
-						semestar.getStartDate(),semestar.getEndDate(),semestar.getCode());
+						semestar.getStartDate(),semestar.getEndDate(),semestar.getCode(),semestar.isActive());
 				list.add(semestarDTO);
 			}
 			if (list.size() != 0) {
@@ -81,7 +81,7 @@ public class SemestarController {
 			Optional<Semestar> semestar = semestarService.findById(id);
 			if (semestar.isPresent()) {
 				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
-						semestar.get().getEndDate(), semestar.get().getCode());
+						semestar.get().getEndDate(), semestar.get().getCode(),semestar.get().isActive());
 				return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
@@ -91,7 +91,7 @@ public class SemestarController {
 		}
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSemestar(@Valid @RequestBody SemestarDTO newSemestar, BindingResult result) {
@@ -102,7 +102,7 @@ public class SemestarController {
 		}
 
 		Semestar newSemestarEntity = new Semestar(newSemestar.getName(),newSemestar.getValue(),
-				newSemestar.getStartDate(),newSemestar.getEndDate(), newSemestar.getCode());
+				newSemestar.getStartDate(),newSemestar.getEndDate(), newSemestar.getCode(),newSemestar.isActive());
 
 		semestarService.addNew(newSemestarEntity);
 
@@ -129,6 +129,7 @@ public class SemestarController {
 				semestar.get().setValue(newSemestar.getValue());
 				semestar.get().setStartDate(newSemestar.getStartDate());
 				semestar.get().setEndDate(newSemestar.getEndDate());
+				semestar.get().setActive(newSemestar.isActive());
 				
 
 				semestarService.update(id, semestar.get());
@@ -152,7 +153,7 @@ public class SemestarController {
 			if (semestar.isPresent()) {
 
 				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
-						semestar.get().getEndDate(),semestar.get().getCode());
+						semestar.get().getEndDate(),semestar.get().getCode(),semestar.get().isActive());
 				semestarService.delete(id);
 				return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
 			}

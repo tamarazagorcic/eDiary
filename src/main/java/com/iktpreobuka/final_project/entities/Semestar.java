@@ -45,12 +45,22 @@ public class Semestar {
 	@ColumnDefault("0")
 	private Integer version;
 	
+	@Column
+	private boolean active;
+	
+	
 	
 	@OneToMany(mappedBy = "semestar", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<SchoolClass> classes = new ArrayList<>();
 	
 	
 	
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 	public String getCode() {
 		return code;
 	}
@@ -117,6 +127,17 @@ public class Semestar {
 		this.endDate = endDate;
 		this.code = code;
 	}
+	public Semestar(String name, Integer value, LocalDate startDate, LocalDate endDate, String code, boolean active) {
+		super();
+		this.name = name;
+		this.value = value;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.code = code;
+		this.active = active;
+	}
+	
+	
 	
 	
 }

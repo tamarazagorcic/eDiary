@@ -10,18 +10,18 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
-import com.iktpreobuka.final_project.entities.Subject;
+import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.repositories.ProfessorSubjectClassRepository;
 import com.iktpreobuka.final_project.repositories.ProfessorSubjectRepository;
 import com.iktpreobuka.final_project.repositories.PupilRepository;
 import com.iktpreobuka.final_project.repositories.PupilsInClassRepository;
 import com.iktpreobuka.final_project.repositories.SchoolClassRepository;
+import com.iktpreobuka.final_project.repositories.SemestarRepository;
 
 @Service
 public class SchoolClassServiceImpl implements SchoolClassService{
@@ -43,6 +43,9 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 	
 	@Autowired
 	private ProfessorService pService;
+	
+	@Autowired
+	private SemestarRepository semstarRepo;
 	
 	
 	@PersistenceContext
@@ -78,6 +81,7 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		temp.setGrade(newSchoolClass.getGrade());
 		temp.setVersion(newSchoolClass.getVersion());
 		temp.setSemestar(newSchoolClass.getSemestar());
+		temp.setName(newSchoolClass.getName());
 		
 		
 		
@@ -163,6 +167,44 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 	public Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil){
 		return pcRepo.findByPupilAndSchoolClass(pupil, sc);
 	}
+	
+	public List<SchoolClass> findBySemestar(Semestar semestar){
+		return scRepo.findBySemestar(semestar);
+	}
+	
+	
+	
+//	public SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar) {
+//		
+//     String str = "select sc from SchoolClass sc right join fetch sc.pupils p right join fetch p.pupil pu "
+//     		+ "left join fetch sc.semetar s where pu.id = :id "
+//     		+ "and s.id = :semestar";
+//		
+//		Query query = em.createQuery(str);
+//		query.setParameter("id", id);
+//		query.setParameter("semestar", semestar);
+//		
+//		
+//		return (SchoolClass) query.getSingleResult();
+//		
+//	}
+	
+
+	
+	public SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar) {
+		
+	     String str = "select sc from SchoolClass sc right join fetch sc.pupils p right join fetch p.pupil pu where pu.id = :id "
+	     		+ "and sc.semestar = :semestar";
+			
+			Query query = em.createQuery(str);
+			query.setParameter("id", id);
+			query.setParameter("semestar", semestar);
+			
+			
+			return (SchoolClass) query.getSingleResult();
+			
+		}
+	
 	
 	
 }

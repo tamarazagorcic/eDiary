@@ -80,4 +80,6 @@ public class PupilServiceImpl implements PupilService{
 		return query.getResultList();
 		
 	}
+	
+	
 }
