@@ -134,6 +134,25 @@ public class MarkDTO {
 		this.value = value;
 	}
 
+	public MarkDTO(ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value,
+			LocalDate date) {
+		super();
+		this.activity = activity;
+		this.value = value;
+		this.date = date;
+	}
+
+	public MarkDTO(ProfessorDTO professor, SubjectDTO subject, SchoolClassDTO schoolClass, ActivityDTO activity,
+			@NotNull(message = "Value must be provided.") EMarkValue value, LocalDate date) {
+		super();
+		this.professor = professor;
+		this.subject = subject;
+		this.schoolClass = schoolClass;
+		this.activity = activity;
+		this.value = value;
+		this.date = date;
+	}
+
 	
 
 	

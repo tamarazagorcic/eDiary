@@ -36,8 +36,12 @@ import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
 import com.iktpreobuka.final_project.entities.dto.MarkDTO;
+import com.iktpreobuka.final_project.entities.dto.MarksForMenyDTO;
+import com.iktpreobuka.final_project.entities.dto.MarksForParentDTO;
+import com.iktpreobuka.final_project.entities.dto.MarksProfessorDTO;
 import com.iktpreobuka.final_project.entities.dto.ProfessorDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
+import com.iktpreobuka.final_project.entities.dto.PupilMarkDTO;
 import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
 import com.iktpreobuka.final_project.entities.dto.SubjectDTO;
 import com.iktpreobuka.final_project.models.EmailObject;
@@ -328,6 +332,7 @@ public class MarkController {
 			Optional<PupilsInClass> pc = scService.findPupilsInClass(sc, pupil.get());
 			if (pupil.isPresent() && pc.isPresent()) {
 
+				
 				List<MarkDTO> marks = new ArrayList<>();
 				for (Mark mark : markService.findByPupilInClass(pc.get())) {
 
@@ -341,12 +346,10 @@ public class MarkController {
 					Subject subject = mark.getProfessor().getProfessorSubject().getSubject();
 					SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
 
-					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
-							pupil.get().getCode());
 
 					SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
 
-					MarkDTO markDTO = new MarkDTO(professorDTO, pupilDTO, subjectDTO, scDTO, acDTO, mark.getValue(),
+					MarkDTO markDTO = new MarkDTO(professorDTO,subjectDTO, scDTO, acDTO, mark.getValue(),
 							mark.getDate());
 
 					marks.add(markDTO);
@@ -354,7 +357,11 @@ public class MarkController {
 
 				if (marks.size() != 0) {
 
-					return new ResponseEntity<Iterable<MarkDTO>>(marks, HttpStatus.OK);
+
+					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
+							pupil.get().getCode());
+					PupilMarkDTO pupilsMarks = new PupilMarkDTO(pupilDTO,marks);
+					return new ResponseEntity<PupilMarkDTO>(pupilsMarks, HttpStatus.OK);
 				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
@@ -382,6 +389,11 @@ public class MarkController {
 			Optional<ProfessorSubjectClass> professorSubjectClass = scService
 					.findByProfessorSubjectClass(professorSubject.get(), sc);
 
+			ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(), professor.get().getSurname(),
+					professor.get().getCode());
+			SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
+			SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
+
 			if (pc.isPresent() && professorSubjectClass.isPresent()) {
 
 				List<MarkDTO> marks = new ArrayList<>();
@@ -389,23 +401,25 @@ public class MarkController {
 
 					Activity activity = mark.getActivity();
 					ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
-
-					ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),
-							professor.get().getSurname(), professor.get().getCode());
-					SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
-					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
-							pupil.get().getCode());
-					SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
-					MarkDTO markDTO = new MarkDTO(professorDTO, pupilDTO, subjectDTO, scDTO, acDTO, mark.getValue(),
-							mark.getDate());
+					MarkDTO markDTO = new MarkDTO(acDTO, mark.getValue(), mark.getDate());
 
 					marks.add(markDTO);
 				}
 
 				if (marks.size() != 0) {
 
-					return new ResponseEntity<Iterable<MarkDTO>>(marks, HttpStatus.OK);
+					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
+							pupil.get().getCode());
+
+					PupilMarkDTO pupilMarkDTO = new PupilMarkDTO(pupilDTO, marks);
+
+					MarksProfessorDTO marksProfessorDTO = new MarksProfessorDTO(professorDTO, pupilMarkDTO, subjectDTO,
+							scDTO);
+
+					return new ResponseEntity<MarksProfessorDTO>(marksProfessorDTO, HttpStatus.OK);
 				}
+				return new ResponseEntity<RESTError>(new RESTError(1, "Pupil does not have marks for this subject. "),
+						HttpStatus.BAD_REQUEST);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -429,33 +443,38 @@ public class MarkController {
 			Optional<ProfessorSubjectClass> professorSubjectClass = scService
 					.findByProfessorSubjectClass(professorSubject.get(), sc.get());
 
+			ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(), professor.get().getSurname(),
+					professor.get().getCode());
+			SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
+			SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(), sc.get().getName());
+
 			if (professorSubjectClass.isPresent()) {
 
-				List<MarkDTO> marks = new ArrayList<>();
-				for (Mark mark : markService.findByClassAndSubject(professorSubjectClass.get())) {
+				List<PupilMarkDTO> pupils = new ArrayList<>();
+				for (Pupil pupil : pupilService.findPupilsByClass(idSc)) {
 
-					Activity activity = mark.getActivity();
-					ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
+					List<MarkDTO> marks = new ArrayList<>();
+					for (Mark mark : markService.findByClassAndSubject(professorSubjectClass.get())) {
 
-					Pupil pupil = mark.getPupil().getPupil();
+						Activity activity = mark.getActivity();
+						ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
+						MarkDTO markDTO = new MarkDTO(acDTO, mark.getValue(), mark.getDate());
+						marks.add(markDTO);
+					}
+
 					PupilDTO pupilDTO = new PupilDTO(pupil.getName(), pupil.getSurname(), pupil.getCode());
-					ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),
-							professor.get().getSurname(), professor.get().getCode());
-					SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
-					SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(),
-							sc.get().getName());
-					MarkDTO markDTO = new MarkDTO(professorDTO, pupilDTO, subjectDTO, scDTO, acDTO, mark.getValue(),
-							mark.getDate());
-
-					marks.add(markDTO);
+					PupilMarkDTO pupilMarkDTO = new PupilMarkDTO(pupilDTO, marks);
+					pupils.add(pupilMarkDTO);
 				}
 
-				if (marks.size() != 0) {
-
-					return new ResponseEntity<Iterable<MarkDTO>>(marks, HttpStatus.OK);
-				}
+				MarksForMenyDTO marksDTO = new MarksForMenyDTO(professorDTO, pupils, subjectDTO, scDTO);
+				return new ResponseEntity<MarksForMenyDTO>(marksDTO, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(
+					new RESTError(1,
+							"Something went wrong. There is no conection between "
+									+ "Professor and Subject and School Class that you are trying to get."),
+					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -469,6 +488,8 @@ public class MarkController {
 		try {
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
+
+				List<PupilMarkDTO> pupilsMarks = new ArrayList<>();
 				List<MarkDTO> marks = new ArrayList<>();
 				for (Pupil pupils : parent.get().getParent_pupils()) {
 					try {
@@ -490,26 +511,28 @@ public class MarkController {
 
 								Subject subject = mark.getProfessor().getProfessorSubject().getSubject();
 								SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
-
-								PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
-										pupil.get().getCode());
-
+								
 								SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
-
-								MarkDTO markDTO = new MarkDTO(professorDTO, pupilDTO, subjectDTO, scDTO, acDTO,
-										mark.getValue(), mark.getDate());
-
+								
+								MarkDTO markDTO = new MarkDTO(professorDTO, subjectDTO, scDTO, acDTO, mark.getValue(),
+										mark.getDate());
 								marks.add(markDTO);
 							}
+							PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
+									pupil.get().getCode());
+							PupilMarkDTO pupilMarkDTO = new PupilMarkDTO(pupilDTO, marks);
+							pupilsMarks.add(pupilMarkDTO);
 						}
+						
+
 					} catch (Exception e) {
 						return new ResponseEntity<RESTError>(new RESTError(2, "Exception  :" + e.getMessage()),
 								HttpStatus.INTERNAL_SERVER_ERROR);
 					}
 				}
-				if (marks.size() != 0) {
-					return new ResponseEntity<Iterable<MarkDTO>>(marks, HttpStatus.OK);
-				}
+				MarksForParentDTO marksForParent = new MarksForParentDTO(pupilsMarks);
+				return new ResponseEntity<MarksForParentDTO>(marksForParent, HttpStatus.OK);
+
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
