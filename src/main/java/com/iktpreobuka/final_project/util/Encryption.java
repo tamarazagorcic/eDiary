@@ -16,7 +16,7 @@ public static String getPassEncoded(String pass) {
 	
 	
 	public static void main(String[] args) { 
-		System.out.println(getPassEncoded("jasnaJ")); 
+		System.out.println(getPassEncoded("smiljana")); 
 		
 	
 	}

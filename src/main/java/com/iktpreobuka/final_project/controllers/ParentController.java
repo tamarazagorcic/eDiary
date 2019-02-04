@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
-import com.iktpreobuka.final_project.entities.Role;
+import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
+import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.ParentService;
+import com.iktpreobuka.final_project.services.PupilService;
 import com.iktpreobuka.final_project.services.UserService;
 import com.iktpreobuka.final_project.util.ParentCustomValidator;
 import com.iktpreobuka.final_project.util.View;
@@ -40,17 +42,24 @@ public class ParentController {
 	@Autowired
 	private ParentService parentService;
 
+		
 	@Autowired
-	ParentCustomValidator parentValidator;
+	private ParentCustomValidator parentValidator;
 	
 	@Autowired
 	private UserService userService;
-
+	
+	@Autowired
+	private PupilService pupilService;
+	
+//
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
+		
 		binder.addValidators(parentValidator);
+		
 	}
-
+	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
@@ -62,7 +71,7 @@ public class ParentController {
 		try {
 			List<ParentDTO> list = new ArrayList<>();
 			for (Parent parent : parentService.getAllParents()) {
-				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getCode());
+				ParentDTO parentDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),parent.getCode());
 				list.add(parentDTO);
 			}
 			if (list.size() != 0) {
@@ -83,7 +92,7 @@ public class ParentController {
 		try {
 			List<ParentDTO> list = new ArrayList<>();
 			for (Parent parent : parentService.getAllParents()) {
-				ParentDTO parentDTO = new ParentDTO(parent.getName(),parent.getSurname(),parent.getCode());
+				ParentDTO parentDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),parent.getCode());
 				list.add(parentDTO);
 			}
 			if (list.size() != 0) {
@@ -97,7 +106,7 @@ public class ParentController {
 		}
 
 	}
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByParentId(@PathVariable Long id) {
@@ -105,7 +114,7 @@ public class ParentController {
 		try {
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
-				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),
+				ParentDTO parentDTO = new ParentDTO(parent.get().getId(),parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
 				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
 			}
@@ -115,18 +124,24 @@ public class ParentController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewParent(@Valid @RequestBody ParentDTO newParent, BindingResult result) {
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-		} else {
-			parentValidator.validate(newParent, result);
-		}
+		}else{
+		parentValidator.validate(newParent, result);
+	}
+		
+		if(parentService.ifExists(newParent.getCode())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Code for parent is present"), HttpStatus.BAD_REQUEST);
+		}if(userService.ifExists(newParent.getParentUser().getUsername())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
+		}if(userService.ifExistsEmail(newParent.getParentUser().getEmail())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
 
-		
-		
+		}
 		User parentUser = new User(newParent.getParentUser().getEmail(),newParent.getParentUser().getPassword(),
 				newParent.getParentUser().getUsername());
 		
@@ -134,19 +149,22 @@ public class ParentController {
 		
 		Parent newParentEntity = new Parent(newParent.getName(),newParent.getSurname(),
 				newParent.getCode(),thisUser );
-		parentService.addNewParent(newParentEntity);
-		
+		Parent savedParent = parentService.addNewParent(newParentEntity);
 		
 		RoleDTO roleDTO = new RoleDTO(thisUser.getRole().getName());
+		UserDTO userDTO = new UserDTO(savedParent.getUser_id().getEmail(),savedParent.getUser_id().getUsername(),roleDTO);
+		ParentDTO parentDTO = new ParentDTO(savedParent.getId(),savedParent.getName(),savedParent.getSurname(),
+				savedParent.getCode(),userDTO);
 		
-		newParent.getParentUser().setRole(roleDTO);
+		
+		
 		
 
-		return new ResponseEntity<>(newParent, HttpStatus.OK);
+		return new ResponseEntity<>(parentDTO, HttpStatus.OK);
 	}
 	
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateParent(@Valid @RequestBody ParentDTO newParent,@PathVariable Long id, 
@@ -155,20 +173,27 @@ public class ParentController {
 		try {
 			if (result.hasErrors()) {
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-				} else {
-					parentValidator.validate(newParent, result);
 				}
 
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
-				parent.get().setCode(newParent.getCode());
+				if(!parent.get().getCode().equals(newParent.getCode())) {
+					if(parentService.ifExists(newParent.getCode())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Code for parent is present"), HttpStatus.BAD_REQUEST);
+					}else {
+						parent.get().setCode(newParent.getCode());
+					}
+				}
 				parent.get().setName(newParent.getName());
 				parent.get().setSurname(newParent.getSurname());
 				
 
 				parentService.updateParent(id, parent.get());
 
-				return new ResponseEntity<>(newParent, HttpStatus.OK);
+				ParentDTO parentDTO = new ParentDTO(parent.get().getId(),parent.get().getName(),parent.get().getSurname(),
+						parent.get().getCode());
+				
+				return new ResponseEntity<>(parentDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -177,7 +202,7 @@ public class ParentController {
 		}
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByParentId(@PathVariable Long id) {
@@ -185,11 +210,18 @@ public class ParentController {
 		try {
 			Optional<Parent> parent = parentService.findById(id);
 			if (parent.isPresent()) {
+				List<Pupil>pupils = pupilService.findPupilsByParent(parent.get());
+				if(pupils.size() !=0) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete parent when there are pupils in this school."), HttpStatus.BAD_REQUEST);
 
-				ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),
+				}else {
+
+					ParentDTO parentDTO = new ParentDTO(parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
-				parentService.deleteParent(id);
-				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
+					userService.deleteUser(parent.get().getUser_id().getId());
+					parentService.deleteParent(id);
+					return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {

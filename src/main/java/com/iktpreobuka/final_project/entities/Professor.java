@@ -28,12 +28,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Professor extends Person{
 
 	
-	@Id
-	@GeneratedValue
-	private Long id;
+
 	
 	
-	@OneToMany(mappedBy = "professor", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ProfessorSubject> subjects = new ArrayList<>();
 	
 
@@ -42,14 +40,6 @@ public class Professor extends Person{
 	private User user_id;
 	
 	
-	
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
 	public User getUser_id() {
 		return user_id;
 	}

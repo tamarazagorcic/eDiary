@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.iktpreobuka.final_project.entities.Activity;
 import com.iktpreobuka.final_project.repositories.ActivityRepository;
 
-
 @Service
 public class ActivityServiceImpl implements ActivityService {
 
@@ -56,4 +55,34 @@ public class ActivityServiceImpl implements ActivityService {
 	public Activity findActivityByName(String name) {
 		return activityRepo.findByName(name);
 	}
+
+	public boolean ifExists(String code, String name) {
+
+		if (activityRepo.findByCode(code) != null  || activityRepo.findByName(name) != null) {
+			return true;
+		} else
+			return false;
+
+	}
+
+	public boolean ifExistsCode(String code) {
+
+		if (activityRepo.findByCode(code) != null) {
+			return true;
+		} else
+			return false;
+
+	}
+
+	public boolean ifExistsName(String name) {
+
+		if (activityRepo.findByCode(name) != null) {
+			return true;
+		} else
+			return false;
+
+	}
+	
+	 
+
 }

@@ -12,5 +12,8 @@ public interface ActivityService {
 	Activity updateActivity(Long id, Activity newActivity);
 	Activity deleteActivity(Long id);
 	Activity findActivityByName(String name);
+	boolean ifExists(String code, String name);
+	boolean ifExistsCode(String code);
+	boolean ifExistsName(String name);
 	
 }

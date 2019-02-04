@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table (name="subject")
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Subject {
 
 	@Id
@@ -29,6 +28,7 @@ public class Subject {
 	
 	@Column(unique = true)
 	private String name;
+	
 	@Column(unique = true)
 	private String code;
 	
@@ -36,7 +36,7 @@ public class Subject {
 	@ColumnDefault("0")
 	private Integer version;
 	
-	@JsonIgnore
+	
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<ProfessorSubject> professors = new ArrayList<>();
 	

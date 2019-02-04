@@ -14,7 +14,7 @@ import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class MarkDTO {
 
-	@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)
@@ -126,6 +126,19 @@ public class MarkDTO {
 		this.value = value;
 		this.date = date;
 	}
+	
+
+	public MarkDTO(Long id, ProfessorDTO professor, PupilDTO pupil, SubjectDTO subject, SchoolClassDTO schoolClass,
+			ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value, LocalDate date) {
+		this.id = id;
+		this.professor = professor;
+		this.pupil = pupil;
+		this.subject = subject;
+		this.schoolClass = schoolClass;
+		this.activity = activity;
+		this.value = value;
+		this.date = date;
+	}
 
 	public MarkDTO(@NotNull(message = "Activity must be provided.") ActivityDTO activity,
 			@NotNull(message = "Value must be provided.") EMarkValue value) {
@@ -133,6 +146,8 @@ public class MarkDTO {
 		this.activity = activity;
 		this.value = value;
 	}
+	
+
 
 	public MarkDTO(ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value,
 			LocalDate date) {

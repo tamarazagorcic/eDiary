@@ -3,7 +3,9 @@ package com.iktpreobuka.final_project.entities.dto;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -19,11 +21,12 @@ import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class SchoolClassDTO {
 
-	@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
 	
 	@JsonView(View.Admin.class)
-	@NotNull(message = "Code must be provided.")
+	@NotBlank(message = "Code must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Code must not contain white space.")
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
@@ -36,25 +39,15 @@ public class SchoolClassDTO {
 	private SemestarDTO semestarDTO;
 	
 	@JsonView(View.Public.class)
+	@NotBlank(message = "Name must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Name must not contain white space.")
+	@Size(min=1, max=30, message = "Name must be between {min} and {max} characters long.")
 	private String name;
 	
 	@JsonView(View.Public.class)
 	private List<PupilDTO> pupilsAttendingClass;
-	
-	
-//	@JsonView(View.Public.class)
-//	//@JsonManagedReference("classsemestar")
-//	private Semestar semestar;
-	
-	@JsonIgnore
-	@JsonBackReference("classpupils")
-	private List<PupilsInClass> pupils;
-	
-	@JsonIgnore
-	@JsonBackReference("classprofesorsubject")
-	private List<ProfessorSubjectClass> professors_subjects;
 
-	
+
 
 
 	public String getName() {
@@ -87,24 +80,6 @@ public class SchoolClassDTO {
 
 	public void setGrade(EGrade grade) {
 		this.grade = grade;
-	}
-
-
-
-	public List<PupilsInClass> getPupils() {
-		return pupils;
-	}
-
-	public void setPupils(List<PupilsInClass> pupils) {
-		this.pupils = pupils;
-	}
-
-	public List<ProfessorSubjectClass> getProfessors_subjects() {
-		return professors_subjects;
-	}
-
-	public void setProfessors_subjects(List<ProfessorSubjectClass> professors_subjects) {
-		this.professors_subjects = professors_subjects;
 	}
 
 	
@@ -190,6 +165,31 @@ public class SchoolClassDTO {
 		this.semestarDTO = semestarDTO;
 		this.name = name;
 	}
+
+	public SchoolClassDTO(Long id,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 1, max = 30, message = "Name must be between {min} and {max} characters long.") String name) {
+		this.id = id;
+		this.code = code;
+		this.grade = grade;
+		this.semestarDTO = semestarDTO;
+		this.name = name;
+	}
+
+	public SchoolClassDTO(Long id,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade, SemestarDTO semestarDTO,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 1, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			List<PupilDTO> pupilsAttendingClass) {
+		this.id = id;
+		this.code = code;
+		this.grade = grade;
+		this.semestarDTO = semestarDTO;
+		this.name = name;
+		this.pupilsAttendingClass = pupilsAttendingClass;
+	}
+
 
 	
 

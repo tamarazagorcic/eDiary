@@ -67,6 +67,15 @@ public class ProfessorServiceImpl implements ProfessorService{
 		return temp;
 	}
 	
+	public ProfessorSubject deletePS(Long id) {
+		if(!psRepo.findById(id).isPresent()) {
+			return null;
+		}
+		ProfessorSubject temp = psRepo.findById(id).get();
+		psRepo.deleteById(id);
+		return temp;
+	}
+	
 	public ProfessorSubject addNewPS(Professor newProfessor, Subject newSubject) {
 		
 		ProfessorSubject ps = new ProfessorSubject(newProfessor,newSubject);
@@ -74,12 +83,12 @@ public class ProfessorServiceImpl implements ProfessorService{
 		return psRepo.save(ps);
 	}
 	
-//	public List<Subject> findSubjectsByProfessor(Long professor){
-//		
-//		return psRepo.findByProfessor(professor);
-//	}
-//	
-
+	public List<ProfessorSubject> findPSByProfessor(Professor professor){
+		
+		return psRepo.findByProfessor(professor);
+	}
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	public List<Subject> findSubjectByProff(Long id){
@@ -92,19 +101,7 @@ public class ProfessorServiceImpl implements ProfessorService{
 		
 		return query.getResultList();
 	}
-	
-//	public ProfessorSubject fingConectionProfSubject(Long idP, Long idS) {
-//		
-//		String str = "select ps from ProfessorSubject ps right join fetch ps.professor p where p.id = :idP"
-//				+ "and ps.subject s where s.id = :idS";
-//		
-//		Query query = em.createQuery(str);
-//		query.setParameter("id", idP);
-//		query.setParameter("id", idS);
-//		
-//		return (ProfessorSubject) query.getSingleResult();
-//		
-//	}
+
 	
 	public Optional<ProfessorSubject> findByProfessorSubject(Professor professor, Subject subject) {
 		return psRepo.findByProfessorAndSubject(professor, subject);
@@ -117,4 +114,14 @@ public class ProfessorServiceImpl implements ProfessorService{
 			return true;
 		}else return false;
 	}
+	
+	public boolean ifExists(String code) {
+		
+		if(professorRepo.findByCode(code) != null) {
+			return true;
+		}else return false;
+		
+		
+	}
+	
 }

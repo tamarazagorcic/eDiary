@@ -41,7 +41,6 @@ public class Mark {
 	@ColumnDefault("0")
 	private Integer version;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone="Europe/Belgrade")
 	private LocalDate date;
 	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

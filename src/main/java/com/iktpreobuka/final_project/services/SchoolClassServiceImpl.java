@@ -27,55 +27,49 @@ import com.iktpreobuka.final_project.repositories.SemestarRepository;
 public class SchoolClassServiceImpl implements SchoolClassService{
 
 	@Autowired
-	private SchoolClassRepository scRepo;
+	private SchoolClassRepository schoolClassRepo;
 	
 	@Autowired
-	private PupilsInClassRepository pcRepo;
+	private PupilsInClassRepository pupilsInClassRepo;
 	
 	@Autowired
-	private PupilRepository pRepo;
+	private PupilRepository pupilRepo;
 	
-	@Autowired 
-	private ProfessorSubjectRepository psRepo;
 	
 	@Autowired
-	private ProfessorSubjectClassRepository pscRepo;
+	private ProfessorSubjectClassRepository professorSubjectClassRepo;
 	
-	@Autowired
-	private ProfessorService pService;
 	
-	@Autowired
-	private SemestarRepository semstarRepo;
 	
 	
 	@PersistenceContext
 	private EntityManager em;
 	
 	public Iterable<SchoolClass> getAll() {
-		return scRepo.findAll();
+		return schoolClassRepo.findAll();
 	}
 
 	
 	public Optional<SchoolClass> findById(Long id) {
 		
-		return scRepo.findById(id);
+		return schoolClassRepo.findById(id);
 	}
 
 	
 	public SchoolClass addNew(SchoolClass newSchoolClass) {
 		
 		
-		return scRepo.save(newSchoolClass);
+		return schoolClassRepo.save(newSchoolClass);
 	}
 
 	
 	public SchoolClass update(Long id, SchoolClass newSchoolClass) {
 
-		if (newSchoolClass == null || !scRepo.findById(id).isPresent()) {
+		if (newSchoolClass == null || !schoolClassRepo.findById(id).isPresent()) {
 			return null;
 		}
 
-		SchoolClass temp = scRepo.findById(id).get();
+		SchoolClass temp = schoolClassRepo.findById(id).get();
 
 		temp.setCode(newSchoolClass.getCode());
 		temp.setGrade(newSchoolClass.getGrade());
@@ -86,27 +80,27 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		
 		
 
-		return scRepo.save(temp);
+		return schoolClassRepo.save(temp);
 	}
 
 	
 	public SchoolClass delete(Long id) {
 		
-		if (!scRepo.findById(id).isPresent()) {
+		if (!schoolClassRepo.findById(id).isPresent()) {
 			return null;
 		}
-		SchoolClass temp = scRepo.findById(id).get();
-		scRepo.deleteById(id);
+		SchoolClass temp = schoolClassRepo.findById(id).get();
+		schoolClassRepo.deleteById(id);
 		return temp;
 	}
 	
 	public PupilsInClass addNewPC(Long idSC, Long idP) {
 	
-	SchoolClass tempSC = scRepo.findById(idSC).get();
-	Pupil tempP = pRepo.findById(idP).get();
+	SchoolClass tempSC = schoolClassRepo.findById(idSC).get();
+	Pupil tempP = pupilRepo.findById(idP).get();
 		
 		PupilsInClass entity = new PupilsInClass(tempSC,tempP);
-		return pcRepo.save(entity);
+		return pupilsInClassRepo.save(entity);
 	}
 
 
@@ -126,27 +120,16 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 		
 	}
 
-//
-//	public ProfessorSubjectClass addNewSubjectsToClass(Long idP, Long idS,Long idSC) {
-//		
-//		ProfessorSubject temp = (ProfessorSubject) pService.fingConectionProfSubject(idP, idS);
-//		
-//		SchoolClass tempSC = scRepo.findById(idSC).get();
-//		
-//		ProfessorSubjectClass entity = new ProfessorSubjectClass(temp,tempSC);
-//		return pscRepo.save(entity);
-//		
-//	}
 	
 	public ProfessorSubjectClass addSubjectToClass(ProfessorSubjectClass professorSubjectClass) {
 		
 		
-		return pscRepo.save(professorSubjectClass);
+		return professorSubjectClassRepo.save(professorSubjectClass);
 	}
 
 	@SuppressWarnings("static-access")
 	public boolean ifExistsConectonSchoolClassPupil(SchoolClass sc, Pupil pupil) {
-		Optional<PupilsInClass> pupilClass = pcRepo.findByPupilAndSchoolClass(pupil, sc);
+		Optional<PupilsInClass> pupilClass = pupilsInClassRepo.findByPupilAndSchoolClass(pupil, sc);
 		if( pupilClass.isPresent()) {
 			return true;
 		}else return false;
@@ -154,24 +137,51 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 
 	@SuppressWarnings("static-access")
 	public boolean ifExistsConectonProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc) {
-		Optional<ProfessorSubjectClass> psc = pscRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
+		Optional<ProfessorSubjectClass> psc = professorSubjectClassRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
 		if( psc.isPresent()) {
 			return true;
 		}else return false;
 	}
 	
 	public Optional<ProfessorSubjectClass> findByProfessorSubjectClass(ProfessorSubject professorSubject, SchoolClass sc) {
-		return pscRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
+		return professorSubjectClassRepo.findByProfessorSubjectAndSchoolClass(professorSubject, sc);
+	}
+	
+	public ProfessorSubjectClass deletePSC(Long id) {
+		
+		if (!professorSubjectClassRepo.findById(id).isPresent()) {
+			return null;
+		}
+		ProfessorSubjectClass temp = professorSubjectClassRepo.findById(id).get();
+		professorSubjectClassRepo.deleteById(id);
+		return temp;
 	}
 	
 	public Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil){
-		return pcRepo.findByPupilAndSchoolClass(pupil, sc);
+		return pupilsInClassRepo.findByPupilAndSchoolClass(pupil, sc);
 	}
-	
+	public PupilsInClass deletePupilsInClass(Long id) {
+		
+		if (!pupilsInClassRepo.findById(id).isPresent()) {
+			return null;
+		}
+		PupilsInClass temp = pupilsInClassRepo.findById(id).get();
+		pupilsInClassRepo.deleteById(id);
+		return temp;
+	}
+	public List<PupilsInClass> findConectionByPupil(Pupil pupil){
+		return pupilsInClassRepo.findByPupil(pupil);
+	}
+	public List<PupilsInClass> findConectionBySchoolClass(SchoolClass schoolClass){
+		return pupilsInClassRepo.findBySchoolClass(schoolClass);
+	}
 	public List<SchoolClass> findBySemestar(Semestar semestar){
-		return scRepo.findBySemestar(semestar);
+		return schoolClassRepo.findBySemestar(semestar);
 	}
 	
+	public List<ProfessorSubjectClass> findConectionPSC(ProfessorSubject professorSubject){
+		return professorSubjectClassRepo.findByProfessorSubject(professorSubject);
+	}
 	
 	
 //	public SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar) {
@@ -205,6 +215,13 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 			
 		}
 	
-	
+	public boolean ifExistsCode(String code) {
+
+		if (schoolClassRepo.findByCode(code) != null) {
+			return true;
+		} else
+			return false;
+
+	}
 	
 }

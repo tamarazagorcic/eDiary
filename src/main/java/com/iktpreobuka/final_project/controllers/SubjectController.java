@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Activity;
+import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.Subject;
@@ -53,16 +54,15 @@ public class SubjectController {
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
-	
-	
-	@Secured("admin")
+
+	// @Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSubjectsAdmin() {
 		try {
 			List<SubjectDTO> list = new ArrayList<>();
 			for (Subject subject : subjectService.getAllSubject()) {
-				SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
+				SubjectDTO subjectDTO = new SubjectDTO(subject.getId(), subject.getName(), subject.getCode());
 				list.add(subjectDTO);
 			}
 			if (list.size() != 0) {
@@ -76,8 +76,8 @@ public class SubjectController {
 		}
 
 	}
-	
-	@Secured("admin")
+
+	// @Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySubjectId(@PathVariable Long id) {
@@ -85,7 +85,8 @@ public class SubjectController {
 		try {
 			Optional<Subject> subject = subjectService.findById(id);
 			if (subject.isPresent()) {
-				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
+				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getId(), subject.get().getName(),
+						subject.get().getCode());
 				return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
@@ -94,8 +95,8 @@ public class SubjectController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	@Secured("admin")
+
+	// @Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSubject(@Valid @RequestBody SubjectDTO newSubject, BindingResult result) {
@@ -104,35 +105,60 @@ public class SubjectController {
 		} else {
 			subjectValidator.validate(newSubject, result);
 		}
+		if (subjectService.ifExists(newSubject.getCode())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Code for subject is present"),
+					HttpStatus.BAD_REQUEST);
+		}
+		if (subjectService.ifExistsName(newSubject.getName())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Name for subject is present"),
+					HttpStatus.BAD_REQUEST);
+		}
 
 		Subject newSubjectEntity = new Subject(newSubject.getName(), newSubject.getCode());
 
 		subjectService.addNewSubject(newSubjectEntity);
-
-		return new ResponseEntity<>(newSubject, HttpStatus.OK);
+		SubjectDTO subjectDTO = new SubjectDTO(newSubjectEntity.getId(), newSubjectEntity.getName(),
+				newSubjectEntity.getCode());
+		return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 	}
 
-	@Secured("admin")
+	// @Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
-	public ResponseEntity<?> updateActivity(@Valid @RequestBody SubjectDTO newSubject,@PathVariable Long id, 
+	public ResponseEntity<?> updateActivity(@Valid @RequestBody SubjectDTO newSubject, @PathVariable Long id,
 			BindingResult result) {
 
 		try {
 			if (result.hasErrors()) {
-					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-				} else {
-					subjectValidator.validate(newSubject, result);
-				}
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			} else {
+				subjectValidator.validate(newSubject, result);
+			}
 
 			Optional<Subject> subject = subjectService.findById(id);
 			if (subject.isPresent()) {
-				subject.get().setCode(newSubject.getCode());
-				subject.get().setName(newSubject.getName());
+				if (!subject.get().getCode().equals(newSubject.getCode())) {
+					if (subjectService.ifExists(newSubject.getCode())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Code for subject is present"),
+								HttpStatus.BAD_REQUEST);
+					} else {
+						subject.get().setCode(newSubject.getCode());
+					}
+				}
+				if (!subject.get().getName().equals(newSubject.getName())) {
+					if (subjectService.ifExistsName(newSubject.getName())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Name for subject is present"),
+								HttpStatus.BAD_REQUEST);
+					} else {
+						subject.get().setName(newSubject.getName());
+					}
+				}
 
 				subjectService.updateSubject(id, subject.get());
+				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getId(), subject.get().getName(),
+						subject.get().getCode());
 
-				return new ResponseEntity<>(newSubject, HttpStatus.OK);
+				return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -140,7 +166,8 @@ public class SubjectController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@Secured("admin")
+
+	// @Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySubjectId(@PathVariable Long id) {
@@ -149,9 +176,18 @@ public class SubjectController {
 			Optional<Subject> subject = subjectService.findById(id);
 			if (subject.isPresent()) {
 
-				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
-				subjectService.deleteSubject(id);
-				return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
+				List<ProfessorSubject> professors = subjectService.findPSBySubject(subject.get());
+				if (professors.size() != 0) {
+					return new ResponseEntity<RESTError>(
+							new RESTError(1,
+									"You can not delete subject when there are professors" + " conected to him/her."),
+							HttpStatus.BAD_REQUEST);
+
+				} else {
+					SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
+					subjectService.deleteSubject(id);
+					return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -159,5 +195,5 @@ public class SubjectController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 }

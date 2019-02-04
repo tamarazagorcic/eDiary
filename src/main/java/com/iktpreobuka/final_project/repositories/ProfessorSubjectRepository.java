@@ -1,5 +1,6 @@
 package com.iktpreobuka.final_project.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
@@ -10,7 +11,7 @@ import com.iktpreobuka.final_project.entities.Subject;
 
 public interface ProfessorSubjectRepository extends CrudRepository<ProfessorSubject, Long> {
 
-	//List<Subject>findByProfessor(Long id);
+	List<ProfessorSubject>findByProfessor(Professor professor);
 	Optional<ProfessorSubject> findByProfessorAndSubject(Professor professor, Subject subject);
-	
+	List<ProfessorSubject>findBySubject(Subject subject);
 }

@@ -6,4 +6,5 @@ import com.iktpreobuka.final_project.entities.Professor;
 
 public interface ProfessorRepository extends CrudRepository<Professor, Long> {
 
+	Professor findByCode(String code);
 }

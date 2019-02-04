@@ -29,6 +29,7 @@ import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
+import com.iktpreobuka.final_project.entities.dto.PasswordDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
 import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.RoleService;
@@ -50,8 +51,9 @@ public class UserController {
 	@Autowired
 	private RoleService roleService;
 	
+	
 
-	@InitBinder
+	@InitBinder("UserDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(userValidator);
 	}
@@ -60,7 +62,7 @@ public class UserController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllUsersAdmin() {
@@ -76,7 +78,7 @@ public class UserController {
 			if (list.size() != 0) {
 				return new ResponseEntity<Iterable<UserDTO>>(list, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
+			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Users"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
@@ -107,7 +109,7 @@ public class UserController {
 		}
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewUser(@Valid @RequestBody UserDTO newUser, BindingResult result) {
@@ -116,6 +118,15 @@ public class UserController {
 		} else {
 			userValidator.validate(newUser, result);
 			
+		}
+
+		if(userService.ifExists(newUser.getUsername())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
+		}if(userService.ifExistsEmail(newUser.getEmail())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
+
+		}if(newUser.getRole().getName().isEmpty()) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Name for role must be provided."), HttpStatus.BAD_REQUEST);
 		}
 
 		//RoleDTO roleDTO = newUser.getRole();
@@ -131,18 +142,20 @@ public class UserController {
 		
 		}else {
 
-			Role role = null;
-			
-			User newuserEntity = new User(newUser.getEmail(), newUser.getPassword(), newUser.getUsername(),role);
+//			String str= "ROLE_"+newUser.getRole().getName().toUpperCase();
+//			Role role = new Role(str);
+//			roleService.addNewRole(role);
+//			User newuserEntity = new User(newUser.getEmail(), newUser.getPassword(), newUser.getUsername(),role);
+//			userService.addNewUserWithoutRole(newuserEntity);
+			return new ResponseEntity<RESTError>(new RESTError(1, "Role must be set already for this operation to succeed."), HttpStatus.BAD_REQUEST);
 
-			userService.addNewUserWithoutRole(newuserEntity);
 			
 		}
 		return new ResponseEntity<>(newUser, HttpStatus.OK);
 
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO newUser,@PathVariable Long id, 
@@ -154,15 +167,27 @@ public class UserController {
 				} else {
 					userValidator.validate(newUser, result);
 				}
-
+			
 			Optional<User> user = userService.findById(id);
 			if (user.isPresent()) {
-				user.get().setEmail(newUser.getEmail());
-				user.get().setPassword(newUser.getPassword());
-				user.get().setUsername(newUser.getUsername());
 				
-				Role role = roleService.findByName(newUser.getRole().getName());
+				if(!user.get().getUsername().equals(newUser.getUsername())) {
+					if(userService.ifExists(newUser.getUsername())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is already present"), HttpStatus.BAD_REQUEST);
+					}
+					user.get().setUsername(newUser.getUsername());
+				}if(!user.get().getEmail().equals(newUser.getEmail())) {
+					if(userService.ifExistsEmail(newUser.getEmail())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is already present"), HttpStatus.BAD_REQUEST);
+					}
+					user.get().setEmail(newUser.getEmail());
+				}
+				
+				if (!roleService.ifExists(newUser.getRole().getName())) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "Role must be already present"), HttpStatus.BAD_REQUEST);
 
+				}
+				Role role = roleService.findByName(newUser.getRole().getName());
 				user.get().setRole(role);
 				userService.updateUser(id, user.get());
 
@@ -174,7 +199,43 @@ public class UserController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@Secured("admin")
+	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.PUT, value = "passwordChange/{id}")
+	public ResponseEntity<?> updateUserPassword(@Valid @RequestBody PasswordDTO newUser,@PathVariable Long id,BindingResult result) {
+
+		try {
+			if (result.hasErrors()) {
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			} 
+			Optional<User> user = userService.findById(id);
+			if (user.isPresent()) {
+				
+				if(!user.get().getPassword().equals(newUser.getOldPassword())) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "Old password does not match."), HttpStatus.BAD_REQUEST);
+
+				}if(!newUser.getNewPassword().equals(newUser.getNewConfirmPassword())) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "Password and confirmation of password does not match."), HttpStatus.BAD_REQUEST);
+
+				}
+				
+				user.get().setPassword(newUser.getNewPassword());
+				userService.updateUser(id, user.get());
+				RoleDTO roleDTO = new RoleDTO(user.get().getRole().getName());
+				UserDTO userDTO = new UserDTO(user.get().getEmail(),user.get().getUsername(),roleDTO);
+
+				return new ResponseEntity<>(userDTO, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
+	
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByUserId(@PathVariable Long id) {
@@ -194,6 +255,8 @@ public class UserController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	
 	@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idUser}/role/{idRole}")
@@ -213,7 +276,7 @@ public class UserController {
 			
 				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError(1, "User or role not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);

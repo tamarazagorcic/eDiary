@@ -21,12 +21,17 @@ public class UserCustomValidator implements Validator{
 	public void validate(Object target, Errors errors) {
 		UserDTO user = (UserDTO) target;
 		
-//		if(!user.getPassword().equals(user.getConfirmPassword())) {
-//			errors.reject("400", "Passwords must be the same.");
-//		}
-		if(user.getUsername().equals("") || user.getUsername().equals(" ")){
-			errors.reject("400", "Username must be provided for user.");
+		if(!user.getPassword().equals(user.getConfirmPassword())) {
+			errors.reject("400", "Passwords must be the same.");
 		}
+//		if(user.getUsername().equals("") || user.getUsername().equals(" ") ){
+//			errors.reject("400", "Username must be provided for user or it is not valid.");
+//		}
 		
+//		if(user.getRole().getName().equals("") || user.getRole().getName().equals(" ")) {
+//			errors.reject("400", "Role name must be provided.");
+//		}
+		
+		//|| user.getUsername().trim().
 	}
 }

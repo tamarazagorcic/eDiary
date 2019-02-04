@@ -20,5 +20,7 @@ public interface ProfessorService {
 	 //ProfessorSubject fingConectionProfSubject(Long idP, Long idS);
 	 Optional<ProfessorSubject> findByProfessorSubject(Professor professor, Subject subject);
 	 boolean ifExistsConectonProfessorSubject(Professor professor, Subject subject);
-	 
+	 boolean ifExists(String code);
+	 ProfessorSubject deletePS(Long id);
+	 List<ProfessorSubject> findPSByProfessor(Professor professor);
 }

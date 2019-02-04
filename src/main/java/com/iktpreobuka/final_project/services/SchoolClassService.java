@@ -27,6 +27,10 @@ public interface SchoolClassService {
 	 Optional<PupilsInClass> findPupilsInClass(SchoolClass sc, Pupil pupil);
 	 List<SchoolClass> findBySemestar(Semestar semestar);
 	 SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar);
-	 
-	 
+	 List<ProfessorSubjectClass> findConectionPSC(ProfessorSubject professorSubject);
+	 ProfessorSubjectClass deletePSC(Long id);
+	 List<PupilsInClass> findConectionByPupil(Pupil pupil);
+	 PupilsInClass deletePupilsInClass(Long id);
+	 boolean ifExistsCode(String code);
+	 List<PupilsInClass> findConectionBySchoolClass(SchoolClass schoolClass);
 }

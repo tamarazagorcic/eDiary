@@ -25,6 +25,12 @@ public class ProfessorCustomValidator implements Validator{
 			errors.reject("400", "Name for professor must be provided.");
 		}if(professor.getSurname().equals("") || professor.getSurname().equals(" ")) {
 			errors.reject("400", "Surname for professor must be provided.");
+		}if(!professor.getProfessorUser().getPassword().equals(professor.getProfessorUser().getConfirmPassword())) {
+			errors.reject("400", "password must match.");
+		}if(professor.getProfessorUser().getEmail().isEmpty()) {
+			errors.reject("400", "email must be provided.");
+		}if(professor.getProfessorUser().getUsername().isEmpty()) {
+			errors.reject("400", "username must be provided.");
 		}
 		
 	}

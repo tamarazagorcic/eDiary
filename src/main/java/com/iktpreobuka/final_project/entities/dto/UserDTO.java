@@ -1,5 +1,6 @@
 package com.iktpreobuka.final_project.entities.dto;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -19,17 +20,19 @@ public class UserDTO {
 	message="Email is not valid.")
 	private String email;
 	
-	@NotNull(message = "Password must be provided.")
+	@NotBlank(message = "Password must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Password must not contain white space.")
 	@Size(min=5, max=10, message = "Password must be between {min} and {max} characters long.")
 	private String password;
 	
-	@JsonIgnore
-	//@NotNull(message = "Password must be provided.")
+	
+	
 	private String confirmPassword;
 	
 	//obicno se stavlja da ima veliko slovo i neki karakter "^[A-Z]+[a-z]+[0-9-\\+]+$"
-	@NotNull(message = "Username must be provided.")
+	@NotBlank(message = "Username must be provided.")
 	@Size(min=5, max=15, message = "Username must be between {min} and {max} characters long.")
+	@Pattern(regexp = "^\\S*$", message = "Username must not contain white space.")
 	private String username;
 	
 	//@JsonIgnore
@@ -96,8 +99,8 @@ public class UserDTO {
 
 	public UserDTO(
 			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
-			@NotNull(message = "Password must be provided.") @Size(min = 5, max = 10, message = "Password must be between {min} and {max} characters long.") String password,
-			@NotNull(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") String username,
+			@NotBlank(message = "Password must be provided.") @Pattern(regexp = "^\\S*$", message = "Password must not contain white space.") @Size(min = 5, max = 10, message = "Password must be between {min} and {max} characters long.") String password,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
 			RoleDTO role) {
 		super();
 		this.email = email;
@@ -105,6 +108,17 @@ public class UserDTO {
 		this.username = username;
 		this.role = role;
 	}
+
+	public UserDTO(
+			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
+			RoleDTO role) {
+		super();
+		this.email = email;
+		this.username = username;
+		this.role = role;
+	}
+
 	
 	
 	

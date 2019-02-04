@@ -67,4 +67,22 @@ public class UserServiceImp implements UserService {
 		return temp;
 	}
 
+	public boolean ifExists(String username) {
+		
+		if(userRepo.findByUsername(username) != null) {
+			return true;
+		}else return false;
+		
+		
+	}
+public boolean ifExistsEmail(String email) {
+		
+		if(userRepo.findByEmail(email) != null) {
+			return true;
+		}else return false;
+		
+		
+	}
+	
+	
 }

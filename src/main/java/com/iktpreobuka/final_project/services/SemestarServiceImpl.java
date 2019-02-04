@@ -103,4 +103,11 @@ public class SemestarServiceImpl implements SemestarService{
 		return semestarRepo.findByActive(active);
 	}
 	
+	public boolean ifExistsActive(boolean active) {
+		if(semestarRepo.findByActive(active) != null) {
+			return true;
+		}else return false;
+		
+	}
+	
 }

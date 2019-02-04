@@ -12,4 +12,5 @@ public interface SemestarRepository extends CrudRepository<Semestar, Long> {
 	Semestar findByCode(String code);
 	Semestar findByActive(boolean active);
 	
+	
 }

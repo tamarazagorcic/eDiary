@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
+import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
+import com.iktpreobuka.final_project.services.SchoolClassService;
 import com.iktpreobuka.final_project.services.SemestarService;
 import com.iktpreobuka.final_project.util.SemestarCustomValidator;
 import com.iktpreobuka.final_project.util.View;
@@ -40,6 +42,9 @@ public class SemestarController {
 	@Autowired
 	SemestarCustomValidator semestarValidator;
 
+	@Autowired
+	private SchoolClassService schoolClassService;
+	
 	@InitBinder
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(semestarValidator);
@@ -49,14 +54,14 @@ public class SemestarController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSemestarsAdmin() {
 		try {
 			List<SemestarDTO> list = new ArrayList<>();
 			for (Semestar semestar : semestarService.getAll()) {
-				SemestarDTO semestarDTO = new SemestarDTO(semestar.getName(), semestar.getValue(), 
+				SemestarDTO semestarDTO = new SemestarDTO(semestar.getId(),semestar.getName(), semestar.getValue(), 
 						semestar.getStartDate(),semestar.getEndDate(),semestar.getCode(),semestar.isActive());
 				list.add(semestarDTO);
 			}
@@ -72,7 +77,7 @@ public class SemestarController {
 
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySemestarId(@PathVariable Long id) {
@@ -80,7 +85,7 @@ public class SemestarController {
 		try {
 			Optional<Semestar> semestar = semestarService.findById(id);
 			if (semestar.isPresent()) {
-				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
+				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getId(),semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
 						semestar.get().getEndDate(), semestar.get().getCode(),semestar.get().isActive());
 				return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
 			}
@@ -100,16 +105,25 @@ public class SemestarController {
 		} else {
 			semestarValidator.validate(newSemestar, result);
 		}
+		if (semestarService.ifExists(newSemestar.getCode())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Code for semestar is already in use."), HttpStatus.BAD_REQUEST);
+		}if(newSemestar.isActive()== true && semestarService.ifExistsActive(true) == true) {
+				return new ResponseEntity<RESTError>(new RESTError(1, "Active semestar is already in use."), HttpStatus.BAD_REQUEST);
+		}
+				Semestar newSemestarEntity = new Semestar(newSemestar.getName(),newSemestar.getValue(),
+						newSemestar.getStartDate(),newSemestar.getEndDate(), newSemestar.getCode(),newSemestar.isActive());
 
-		Semestar newSemestarEntity = new Semestar(newSemestar.getName(),newSemestar.getValue(),
-				newSemestar.getStartDate(),newSemestar.getEndDate(), newSemestar.getCode(),newSemestar.isActive());
+				Semestar savedSemestar = semestarService.addNew(newSemestarEntity);
 
-		semestarService.addNew(newSemestarEntity);
-
-		return new ResponseEntity<>(newSemestar, HttpStatus.OK);
+				SemestarDTO semestarDTO = new SemestarDTO(savedSemestar.getId(),savedSemestar.getName(), savedSemestar.getValue(), 
+						savedSemestar.getStartDate(),savedSemestar.getEndDate(),savedSemestar.getCode(),savedSemestar.isActive());
+				return new ResponseEntity<>(semestarDTO, HttpStatus.OK);
+		
+		
+		
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateSemestar(@Valid @RequestBody SemestarDTO newSemestar,@PathVariable Long id, 
@@ -124,17 +138,30 @@ public class SemestarController {
 
 			Optional<Semestar> semestar = semestarService.findById(id);
 			if (semestar.isPresent()) {
-				semestar.get().setCode(newSemestar.getCode());
+				if(!semestar.get().getCode().equals(newSemestar.getCode())) {
+					if(semestarService.ifExists(newSemestar.getCode())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Code for semestar is already in use."), HttpStatus.BAD_REQUEST);
+
+					}else {
+						semestar.get().setCode(newSemestar.getCode());
+					}
+				}
+			if(newSemestar.isActive()== true && semestarService.ifExistsActive(true) == true) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "Active semestar is already in use."), HttpStatus.BAD_REQUEST);
+			}else {
+				semestar.get().setActive(newSemestar.isActive());
+			}
 				semestar.get().setName(newSemestar.getName());
 				semestar.get().setValue(newSemestar.getValue());
 				semestar.get().setStartDate(newSemestar.getStartDate());
 				semestar.get().setEndDate(newSemestar.getEndDate());
-				semestar.get().setActive(newSemestar.isActive());
+				
 				
 
-				semestarService.update(id, semestar.get());
-
-				return new ResponseEntity<>(newSemestar, HttpStatus.OK);
+				Semestar savedSemestar = semestarService.update(id, semestar.get());
+				SemestarDTO semestarDTO = new SemestarDTO(savedSemestar.getId(),savedSemestar.getName(), savedSemestar.getValue(), 
+						savedSemestar.getStartDate(),savedSemestar.getEndDate(),savedSemestar.getCode(),savedSemestar.isActive());
+				return new ResponseEntity<>(semestarDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -152,10 +179,16 @@ public class SemestarController {
 			Optional<Semestar> semestar = semestarService.findById(id);
 			if (semestar.isPresent()) {
 
-				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
+				List<SchoolClass> schoolClasses = schoolClassService.findBySemestar(semestar.get());
+				if(schoolClasses.size() !=0) {
+					return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete semestar when there are school classes conected to it."), HttpStatus.BAD_REQUEST);
+
+				}else {
+					SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
 						semestar.get().getEndDate(),semestar.get().getCode(),semestar.get().isActive());
-				semestarService.delete(id);
-				return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
+					semestarService.delete(id);
+					return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {

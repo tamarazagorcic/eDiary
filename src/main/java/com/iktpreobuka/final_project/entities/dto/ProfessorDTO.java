@@ -2,43 +2,42 @@ package com.iktpreobuka.final_project.entities.dto;
 
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.util.View;
 
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 
 public class ProfessorDTO {
 
-	@JsonIgnore
+	//@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)
-	@NotNull(message = "Name must be provided.")
+	@NotBlank(message = "Name must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Name must not contain white space.")
 	@Size(min=2, max=30, message = "Name must be between {min} and {max} characters long.")
 	private String name;
 	
 	@JsonView(View.Public.class)
-	@NotNull(message = "Surname must be provided.")
+	@NotBlank(message = "Surname must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.")
 	@Size(min=2, max=30, message = "Surname must be between {min} and {max} characters long.")
 	private String surname;
 	
 	@JsonView(View.Admin.class)
-	@NotNull(message = "Code must be provided.")
+	@NotBlank(message = "Code must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Code must not contain white space.")
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
-	
-//	@JsonIgnore
-//	@JsonBackReference("profesorsubjects")
-//	private List<ProfessorSubject> subjects;
-	
-	
+		
 	@JsonView(View.Public.class)
 	private List<SubjectDTO> subjects;
 	
@@ -87,15 +86,6 @@ public class ProfessorDTO {
 		this.code = code;
 	}
 
-//	public List<ProfessorSubject> getSubjects() {
-//		return subjects;
-//	}
-//
-//	public void setSubjects(List<ProfessorSubject> subjects) {
-//		this.subjects = subjects;
-//	}
-
-	
 	public ProfessorDTO() {
 		super();
 	}
@@ -140,6 +130,44 @@ public class ProfessorDTO {
 		this.surname = surname;
 		this.code = code;
 		this.subjects = subjects;
+	}
+
+	public ProfessorDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			List<SubjectDTO> subjects) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.subjects = subjects;
+	}
+
+	public ProfessorDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			UserDTO professorUser) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.professorUser = professorUser;
+	}
+
+	
+	public ProfessorDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
 	}
 	
 	

@@ -12,5 +12,8 @@ public interface UserService {
 	User updateUser(Long id, User newUser);
 	 User deleteUser(Long id);
 	 User addNewUserWithoutRole(User newUser);
+	 boolean ifExists(String username);
+	 boolean ifExistsEmail(String email);
+	 
 	 
 }

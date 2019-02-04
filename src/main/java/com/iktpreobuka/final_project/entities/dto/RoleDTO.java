@@ -1,7 +1,9 @@
 package com.iktpreobuka.final_project.entities.dto;
 
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,7 +16,8 @@ public class RoleDTO {
 	private Long id;
 	
 	@JsonView(View.Admin.class)
-	@NotNull(message = "Name must be provided.")
+	@NotBlank(message = "Name must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Name must not contain white space.")
 	@Size(min=2, max=30, message = "Name must be between {min} and {max} characters long.")
 	private	String name;
 
@@ -35,8 +38,10 @@ public class RoleDTO {
 		this.id = id;
 	}
 
+	
+
 	public RoleDTO(
-			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name) {
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name) {
 		super();
 		this.name = name;
 	}

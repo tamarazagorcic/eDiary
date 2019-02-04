@@ -10,5 +10,6 @@ import com.iktpreobuka.final_project.entities.Semestar;
 public interface SchoolClassRepository extends CrudRepository<SchoolClass, Long> {
 
 	List<SchoolClass> findBySemestar(Semestar semestar);
+	SchoolClass findByCode(String code);
 	
 }

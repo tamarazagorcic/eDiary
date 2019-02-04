@@ -1,37 +1,33 @@
 package com.iktpreobuka.final_project.entities.dto;
 
-import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.Mark;
 import com.iktpreobuka.final_project.util.View;
 
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ActivityDTO {
 
-	@JsonIgnore
+	//@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)
-	@NotNull(message = "Name must be provided.")
+	@NotBlank(message = "Name must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Name must not contain white space.")
 	@Size(min=2, max=30, message = "Name must be between {min} and {max} characters long.")
 	private String name;
 	
 	@JsonView(View.Admin.class)
-	@NotNull(message = "Code must be provided.")
+	@NotBlank(message = "Code must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Code must not contain white space.")
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
 	
-	@JsonIgnore
-	@JsonBackReference("activitymark")
-	private List<Mark> marks;
+
 
 	public Long getId() {
 		return id;
@@ -58,20 +54,25 @@ public class ActivityDTO {
 	}
 
 
-	public List<Mark> getMarks() {
-		return marks;
-	}
+	
 
-	public void setMarks(List<Mark> marks) {
-		this.marks = marks;
-	}
 
-	public ActivityDTO(String name, String code) {
+
+	public ActivityDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
 		super();
-		
+		this.id = id;
 		this.name = name;
 		this.code = code;
-		
+	}
+
+	public ActivityDTO(
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
+		super();
+		this.name = name;
+		this.code = code;
 	}
 
 	public ActivityDTO() {

@@ -26,11 +26,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Pupil extends Person{
 
 	
-	@Column
+	@Column(unique = true)
 	private String jmbg;
 	
 	
-	@JsonIgnore
+	
 	@OneToMany(mappedBy = "pupil", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<PupilsInClass> schoolClasses = new ArrayList<>();
 	
@@ -90,6 +90,7 @@ public class Pupil extends Person{
 		this.parent = parent;
 		this.user_id = user_id;
 	}
+	
 	
 	
 	

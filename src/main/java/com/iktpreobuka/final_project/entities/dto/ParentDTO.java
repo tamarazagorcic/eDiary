@@ -4,6 +4,7 @@ package com.iktpreobuka.final_project.entities.dto;
 
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -18,25 +19,30 @@ import com.iktpreobuka.final_project.util.View;
 public class ParentDTO {
 
 	
-	@JsonIgnore
+	//@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
+	
 	@JsonView(View.Public.class)
-	@NotNull(message = "Name must be provided.")
+	@NotBlank(message = "Name must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Name must not contain white space.")
 	@Size(min=2, max=30, message = "Name must be between {min} and {max} characters long.")
 	private String name;
+	
 	@JsonView(View.Public.class)
-	@NotNull(message = "Surname must be provided.")
+	@NotBlank(message = "Surname must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.")
 	@Size(min=2, max=30, message = "Surame must be between {min} and {max} characters long.")
 	private String surname;
 	
 	@JsonView(View.Admin.class)
-	@NotNull(message = "Code must be provided.")
+	@NotBlank(message = "Code must be provided.")
+	@Pattern(regexp = "^\\S*$", message = "Code must not contain white space.")
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
 	@JsonView(View.Admin.class)
 	private UserDTO parentUser;
-	
 	
 	@JsonIgnore
 	@JsonBackReference("parentpupils")	
@@ -122,11 +128,37 @@ public class ParentDTO {
 
 
 	
+//
+//	public ParentDTO(
+//			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+//			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+//			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+//			UserDTO parentUser) {
+//		super();
+//		this.name = name;
+//		this.surname = surname;
+//		this.code = code;
+//		this.parentUser = parentUser;
+//	}
+
+	
+
+	public ParentDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+	}
+
 
 	public ParentDTO(
-			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
-			@NotNull(message = "Surname must be provided.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
-			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
 			UserDTO parentUser) {
 		super();
 		this.name = name;
@@ -138,6 +170,20 @@ public class ParentDTO {
 
 	public ParentDTO() {
 		super();
+	}
+
+
+	public ParentDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			UserDTO parentUser) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.parentUser = parentUser;
 	}
 
 

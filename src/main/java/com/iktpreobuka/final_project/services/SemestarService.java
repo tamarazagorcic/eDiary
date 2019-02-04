@@ -14,5 +14,5 @@ public interface SemestarService {
 	boolean ifExists(String code);
 	Semestar findByCode(String code);
 	Semestar findIfActive(boolean active);
-	
+	boolean ifExistsActive(boolean active);
 }

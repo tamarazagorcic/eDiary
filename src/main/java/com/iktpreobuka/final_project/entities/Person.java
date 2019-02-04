@@ -24,7 +24,7 @@ public abstract class Person {
 	public String name;
 	@Column
 	public String surname;
-	@Column
+	@Column(unique=true)
 	public String code;
 	@Version
 	@ColumnDefault("0")

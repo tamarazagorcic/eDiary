@@ -29,6 +29,7 @@ import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.Subject;
@@ -87,9 +88,10 @@ public class SchoolClassController {
 			List<SchoolClassDTO> list = new ArrayList<>();
 			for (SchoolClass sc : scService.getAll()) {
 				Semestar sm = sc.getSemestar();
-				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getCode());
+				SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(),
+						sm.getCode(),sm.isActive());
 
-				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getId(),sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
@@ -104,7 +106,7 @@ public class SchoolClassController {
 
 	}
 
-	@Secured("ROLE_ADMIN")
+	//@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSCAdmin() {
@@ -112,10 +114,10 @@ public class SchoolClassController {
 			List<SchoolClassDTO> list = new ArrayList<>();
 			for (SchoolClass sc : scService.getAll()) {
 				Semestar sm = sc.getSemestar();
-				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getStartDate(), sm.getEndDate(),
-						sm.getCode());
+				SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(), sm.getStartDate(), sm.getEndDate(),
+						sm.getCode(),sm.isActive());
 
-				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getId(),sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
@@ -130,7 +132,7 @@ public class SchoolClassController {
 
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySCId(@PathVariable Long id) {
@@ -139,9 +141,18 @@ public class SchoolClassController {
 			Optional<SchoolClass> sc = scService.findById(id);
 			if (sc.isPresent()) {
 				Semestar sm = sc.get().getSemestar();
-				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
+				SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),
+						sm.getCode(),sm.isActive());
 
-				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(), smDTO, sc.get().getName());
+				List<PupilDTO>pupilsInClass = new ArrayList<>();
+						
+				for(Pupil pupil : pService.findPupilsByClass(id)) {
+					PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(), pupil.getSurname(), pupil.getJmbg(),
+						pupil.getCode());
+					pupilsInClass.add(pupilDTO);
+				}
+						SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getId(),sc.get().getCode(), 
+								sc.get().getGrade(), smDTO, sc.get().getName(),pupilsInClass);
 				return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
@@ -151,7 +162,7 @@ public class SchoolClassController {
 		}
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, BindingResult result) {
@@ -159,36 +170,34 @@ public class SchoolClassController {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			scValidator.validate(newSchoolClass, result);
-			//semestarValidator.validate(newSchoolClass.getSemestarDTO(), result);
+			
 		}
 
-		SemestarDTO smDTO = newSchoolClass.getSemestarDTO();
+		if(scService.ifExistsCode(newSchoolClass.getCode())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Code for school class is already in use."), HttpStatus.BAD_REQUEST);
 
-		if (smService.ifExists(smDTO.getCode())) {
+		}if (smService.ifExists(newSchoolClass.getSemestarDTO().getCode())) {
 
 			Semestar semestar = smService.findByCode(newSchoolClass.getSemestarDTO().getCode());
+			SemestarDTO smDTO = new SemestarDTO(semestar.getId(),semestar.getName(), semestar.getValue(), 
+					semestar.getStartDate(), semestar.getEndDate(),	semestar.getCode(),semestar.isActive());
 			
 				SchoolClass newSCE = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(),newSchoolClass.getName(),
 						semestar);
 
 				scService.addNew(newSCE);
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(newSCE.getId(),newSCE.getCode(), newSCE.getGrade(), smDTO,newSCE.getName());
+				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 		
 		}else {
-
-			Semestar sm = new Semestar(smDTO.getName(), smDTO.getValue(),  smDTO.getStartDate(), smDTO.getEndDate(),smDTO.getCode());
-			smService.addNew(sm);
-			
-			SchoolClass newSCEntity = new SchoolClass(newSchoolClass.getCode(), newSchoolClass.getGrade(),newSchoolClass.getName(), sm);
-
-			scService.addNew(newSCEntity);
-			
+			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(newSchoolClass, HttpStatus.OK);
+		
 
 	}
 
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, @PathVariable Long id,
@@ -203,7 +212,14 @@ public class SchoolClassController {
 
 			Optional<SchoolClass> sc = scService.findById(id);
 			if (sc.isPresent()) {
-				sc.get().setCode(newSchoolClass.getCode());
+				if(!sc.get().getCode().equals(newSchoolClass.getCode())) {
+					if(scService.ifExistsCode(newSchoolClass.getCode())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Code for school class is already in use."), HttpStatus.BAD_REQUEST);
+
+					}else {
+						sc.get().setCode(newSchoolClass.getCode());
+					}
+				}
 				sc.get().setGrade(newSchoolClass.getGrade());
 				sc.get().setName(newSchoolClass.getName());
 				SemestarDTO smDTO = newSchoolClass.getSemestarDTO();
@@ -212,16 +228,17 @@ public class SchoolClassController {
 					Semestar semestar = smService.findByCode(newSchoolClass.getSemestarDTO().getCode());
 					sc.get().setSemestar(semestar);
 				}else {
-					Semestar sm = new Semestar(smDTO.getName(), smDTO.getValue(),  smDTO.getStartDate(), smDTO.getEndDate(),smDTO.getCode());
-					smService.addNew(sm);
-					
-					sc.get().setSemestar(sm);
-					
+					return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 				}
 			
-				scService.update(id, sc.get());
-
-				return new ResponseEntity<>(newSchoolClass, HttpStatus.OK);
+				SchoolClass savedSchoolClass = scService.update(id, sc.get());
+				SemestarDTO semestarDTO = new SemestarDTO(savedSchoolClass.getSemestar().getId(),savedSchoolClass.getSemestar().getName(), 
+						savedSchoolClass.getSemestar().getValue(), savedSchoolClass.getSemestar().getStartDate(),
+						savedSchoolClass.getSemestar().getEndDate(), savedSchoolClass.getSemestar().getCode(),savedSchoolClass.getSemestar().isActive());
+				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(savedSchoolClass.getId(),savedSchoolClass.getCode(), 
+						savedSchoolClass.getGrade(), semestarDTO,savedSchoolClass.getName());
+				
+				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -230,7 +247,7 @@ public class SchoolClassController {
 		}
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySCId(@PathVariable Long id) {
@@ -239,12 +256,18 @@ public class SchoolClassController {
 			Optional<SchoolClass> sc = scService.findById(id);
 			if (sc.isPresent()) {
 
-				Semestar sm = sc.get().getSemestar();
-				SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
+				List<PupilsInClass> pupilInClass = scService.findConectionBySchoolClass(sc.get());
+				if(pupilInClass.size() !=0) {
+							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete school class when there are pupils conected to it."), HttpStatus.BAD_REQUEST);
+
+				}else {
+					Semestar sm = sc.get().getSemestar();
+					SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
 				
-				SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(),smDTO,sc.get().getName());
-				scService.delete(id);
-				return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
+					SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getId(),sc.get().getCode(), sc.get().getGrade(),smDTO,sc.get().getName());
+					scService.delete(id);
+					return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -253,7 +276,7 @@ public class SchoolClassController {
 		}
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
 	public ResponseEntity<?> getAllSchoolClasesByPupil(@PathVariable Long id) {
@@ -264,8 +287,9 @@ public class SchoolClassController {
 				List<SchoolClassDTO> list = new ArrayList<>();
 				for (SchoolClass sc : scService.findClassesByPupils(id)) {
 					Semestar sm = sc.getSemestar();
-					SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(),  sm.getStartDate(), sm.getEndDate(),sm.getCode());
-					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO,sc.getName());
+					SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),  sm.getStartDate(), 
+							sm.getEndDate(),sm.getCode(),sm.isActive());
+					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getId(),sc.getCode(), sc.getGrade(), smDTO,sc.getName());
 					list.add(schoolClassDTO);
 				}
 
@@ -283,29 +307,30 @@ public class SchoolClassController {
 
 	}
 
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupilandclass/{id}")
 	public ResponseEntity<?> getAllSchoolClasesByPupilId(@PathVariable Long id) {
 		try {
 			Optional<Pupil> p = pService.findById(id);
 			Parent pt = p.get().getParent();
-			ParentDTO ptDTO = new ParentDTO(pt.getName(), pt.getSurname(), pt.getCode());
+			ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(), pt.getSurname(), pt.getCode());
 			if (p.isPresent()) {
 
 				List<SchoolClassDTO> list = new ArrayList<>();
 				for (SchoolClass sc : scService.findClassesByPupils(id)) {
 
 					Semestar sm = sc.getSemestar();
-					SemestarDTO smDTO = new SemestarDTO(sm.getName(), sm.getValue(), sm.getCode());
+					SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),  sm.getStartDate(), 
+							sm.getEndDate(),sm.getCode(),sm.isActive());
 
-					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), smDTO, sc.getName());
+					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getId(),sc.getCode(), sc.getGrade(), smDTO, sc.getName());
 
 					list.add(schoolClassDTO);
 				}
 
-				PupilDTO pupilDTO = new PupilDTO(p.get().getName(), p.get().getSurname(), p.get().getJmbg(),
-						p.get().getCode(), ptDTO, list);
+				PupilDTO pupilDTO = new PupilDTO(p.get().getId(),p.get().getName(), p.get().getSurname(), p.get().getJmbg(),
+						p.get().getCode(), list, ptDTO);
 
 				if (list.size() != 0) {
 
@@ -321,7 +346,7 @@ public class SchoolClassController {
 
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idSc}/pupil/{idP}")
 	public ResponseEntity<?> conectionProfessorSubject(@PathVariable Long idSc, @PathVariable Long idP) {
@@ -359,7 +384,7 @@ public class SchoolClassController {
 	}
 
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}/class/{idSC}")
 	public ResponseEntity<?> conectionProfessorSubjectClass(@PathVariable Long idP,@PathVariable Long idS, @PathVariable Long idSC) {

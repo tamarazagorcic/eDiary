@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -23,14 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
+import com.iktpreobuka.final_project.entities.Mark;
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.PupilsInClass;
+import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
-import com.iktpreobuka.final_project.entities.dto.RoleDTO;
+import com.iktpreobuka.final_project.services.MarkService;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
+import com.iktpreobuka.final_project.services.SchoolClassService;
 import com.iktpreobuka.final_project.services.UserService;
 import com.iktpreobuka.final_project.util.ParentCustomValidator;
 import com.iktpreobuka.final_project.util.PupilCustomValidator;
@@ -52,6 +55,10 @@ public class PupilController {
 	
 	@Autowired
 	private ParentService parentService;
+	@Autowired
+	private SchoolClassService scService;
+	@Autowired
+	private MarkService markService;
 	
 	@Autowired
 	private UserService userService;
@@ -65,7 +72,7 @@ public class PupilController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllPupilsPrivate() {
@@ -73,9 +80,9 @@ public class PupilController {
 			List<PupilDTO> list = new ArrayList<>();
 			for (Pupil pupil : pupilService.getAll()) {
 				Parent pt = pupil.getParent();
-				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
 				
-				PupilDTO pupilDTO = new PupilDTO(pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
+				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
 						ptDTO);
 				list.add(pupilDTO);
 			}
@@ -90,7 +97,7 @@ public class PupilController {
 		}
 
 	}
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllPupilsAdmin() {
@@ -98,9 +105,9 @@ public class PupilController {
 			List<PupilDTO> list = new ArrayList<>();
 			for (Pupil pupil : pupilService.getAll()) {
 				Parent pt = pupil.getParent();
-				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
 				
-				PupilDTO pupilDTO = new PupilDTO(pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
+				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
 						ptDTO);
 				list.add(pupilDTO);
 			}
@@ -116,7 +123,7 @@ public class PupilController {
 
 	}
 	
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByPupilId(@PathVariable Long id) {
@@ -125,9 +132,9 @@ public class PupilController {
 			Optional<Pupil> pupil = pupilService.findById(id);
 			if (pupil.isPresent()) {
 				Parent pt = pupil.get().getParent();
-				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
 				
-				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),
+				PupilDTO pupilDTO = new PupilDTO(pupil.get().getId(),pupil.get().getName(),pupil.get().getSurname(),
 						pupil.get().getJmbg(),pupil.get().getCode(),ptDTO);
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 			}
@@ -137,7 +144,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewPupil(@Valid @RequestBody PupilDTO newPupil, BindingResult result) {
@@ -145,50 +152,67 @@ public class PupilController {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			pupilValidator.validate(newPupil, result);
-			//parentValidator.validate(newPupil.getParent(), result);
-			
+		
+		}
+		if(pupilService.ifExists(newPupil.getCode())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Code for pupil is present"), HttpStatus.BAD_REQUEST);
+		}if(pupilService.ifExistsJMBG(newPupil.getJmbg())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Jmbg for pupil is present"), HttpStatus.BAD_REQUEST);
+		}if(userService.ifExists(newPupil.getPupilUser().getUsername())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user pupil is present"), HttpStatus.BAD_REQUEST);
+		}if(userService.ifExistsEmail(newPupil.getPupilUser().getEmail())) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user pupil is present"), HttpStatus.BAD_REQUEST);
 		}
 		
-		User pupilUser = new User (newPupil.getPupilUser().getEmail(),newPupil.getPupilUser().getPassword(),newPupil.getPupilUser().getUsername());
-
-		User thisUser = userService.addNewUser(pupilUser, "ROLE_PUPIL");
 		
 		ParentDTO parentDTO = newPupil.getParent();
 		
 		if(parentService.ifExists(parentDTO.getCode())) {
 			Parent parent = parentService.findByCode(parentDTO.getCode());
-			
-			
+			User pupilUser = new User (newPupil.getPupilUser().getEmail(),newPupil.getPupilUser().getPassword(),newPupil.getPupilUser().getUsername());
+			User thisUser = userService.addNewUser(pupilUser, "ROLE_PUPIL");
 			Pupil newPupilEntity = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
 					parent,thisUser);
 
 			pupilService.addNew(newPupilEntity);
+			ParentDTO ptDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),parent.getCode());
+			PupilDTO pupilDTO = new PupilDTO(newPupilEntity.getId(),newPupilEntity.getName(),newPupilEntity.getSurname(),
+					newPupilEntity.getJmbg(),newPupilEntity.getCode(),ptDTO);
+			
+			return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
 		}else {
+			if(userService.ifExists(newPupil.getParent().getParentUser().getUsername())) {
+				return new ResponseEntity<RESTError>(new RESTError(1, "Username for user for parent is present"), HttpStatus.BAD_REQUEST);
+			}if(userService.ifExistsEmail(newPupil.getParent().getParentUser().getEmail())) {
+				return new ResponseEntity<RESTError>(new RESTError(1, "Email for user for parent is present"), HttpStatus.BAD_REQUEST);
+			}
 			User parentUser = new User(newPupil.getParent().getParentUser().getEmail(),newPupil.getParent().getParentUser().getPassword(),
 					newPupil.getParent().getParentUser().getUsername());
 			
-			User thisUserParent = userService.addNewUser(parentUser, "parent");
+			User thisUserParent = userService.addNewUser(parentUser, "ROLE_PARENT");
+			
 			Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode(),thisUserParent);
 			parentService.addNewParent(parent);
+			User pupilUser = new User (newPupil.getPupilUser().getEmail(),newPupil.getPupilUser().getPassword(),newPupil.getPupilUser().getUsername());
+			User thisUser = userService.addNewUser(pupilUser, "ROLE_PUPIL");
 			
 			Pupil newPupilE = new Pupil(newPupil.getName(),newPupil.getSurname(),newPupil.getJmbg(),newPupil.getCode(),
 					parent,thisUser);
 			
 			pupilService.addNew(newPupilE);
 			
-		}
-	
-		
-		newPupil.getParent().getParentUser().getRole().setName("parent");
-		RoleDTO roleDTO = new RoleDTO(thisUser.getRole().getName());
-		
-		newPupil.getPupilUser().setRole(roleDTO);
+			PupilDTO pupilDTO = new PupilDTO(newPupilE.getId(),newPupilE.getName(),newPupilE.getSurname(),
+					newPupilE.getJmbg(),newPupilE.getCode(),parentDTO);
 
-		return new ResponseEntity<>(newPupil, HttpStatus.OK);
+			return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
+		}
+		
 	}
 	
 	
-	@Secured("admin")
+	
+	
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updatePupil(@Valid @RequestBody PupilDTO newPupil,@PathVariable Long id, 
@@ -203,25 +227,33 @@ public class PupilController {
 
 			Optional<Pupil> pupil = pupilService.findById(id);
 			if (pupil.isPresent()) {
-				pupil.get().setCode(newPupil.getCode());
+				if(!pupil.get().getCode().equals(newPupil.getCode())) {
+					if(pupilService.ifExists(newPupil.getCode())) {
+						return new ResponseEntity<RESTError>(new RESTError(1, "Code for pupil is present"), HttpStatus.BAD_REQUEST);
+					}else {
+						pupil.get().setCode(newPupil.getCode());
+					}
+				}
+				
 				pupil.get().setName(newPupil.getName());
 				pupil.get().setSurname(newPupil.getSurname());
-				pupil.get().setJmbg(newPupil.getJmbg());
 				ParentDTO parentDTO = newPupil.getParent();
 				
 				if(parentService.ifExists(parentDTO.getCode())) {
 					Parent parent = parentService.findByCode(parentDTO.getCode());
 					pupil.get().setParent(parent);
-				}else {
-					Parent parent = new Parent(parentDTO.getName(),parentDTO.getSurname(),parentDTO.getCode());
-					parentService.addNewParent(parent);
-					pupil.get().setParent(parent);
 					
+				}else {
+					
+					return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 				}
 				
 				pupilService.update(id, pupil.get());
+				
+				PupilDTO pupilDTO = new PupilDTO(pupil.get().getId(),pupil.get().getName(),pupil.get().getSurname(),
+						pupil.get().getJmbg(),pupil.get().getCode(),parentDTO);
 
-				return new ResponseEntity<>(newPupil, HttpStatus.OK);
+				return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -229,7 +261,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@Secured("admin")
+	//@Secured("admin")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByPupilId(@PathVariable Long id) {
@@ -237,7 +269,12 @@ public class PupilController {
 		try {
 			Optional<Pupil> pupil = pupilService.findById(id);
 			if (pupil.isPresent()) {
+				
+				List<PupilsInClass> pupilInClass = scService.findConectionByPupil(pupil.get());
+				if(pupilInClass.size() !=0) {
+							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete pupil when there are school classes conected to him/her."), HttpStatus.BAD_REQUEST);
 
+				}else {
 				Parent pt = pupil.get().getParent();
 				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
 				
@@ -245,6 +282,7 @@ public class PupilController {
 						pupil.get().getCode(), ptDTO);
 				pupilService.delete(id);
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
+				}
 			}
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -253,6 +291,36 @@ public class PupilController {
 		}
 	}
 	
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/class/{idSC}")
+	public ResponseEntity<?> deleteByPupilInClass(@PathVariable Long id, @PathVariable Long idSC) {
+
+		try {
+			Optional<Pupil> pupil = pupilService.findById(id);
+			Optional<SchoolClass> sc = scService.findById(idSC);
+			Optional<PupilsInClass> pc = scService.findPupilsInClass(sc.get(), pupil.get());
+			if(pc.isPresent()) {
+				List<Mark> marks = markService.findByPupilInClass(pc.get());
+				if(marks.size() !=0) {
+							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete pupil and school class conection when there are marks."), HttpStatus.BAD_REQUEST);
+
+				}else {
+					
+				Parent pt = pupil.get().getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getName(),pt.getSurname(),pt.getCode());
+				
+				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),pupil.get().getJmbg(),
+						pupil.get().getCode(), ptDTO);
+				scService.delete(pc.get().getId());
+				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
+				}
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil or school class not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	
 	

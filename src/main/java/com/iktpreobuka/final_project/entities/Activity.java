@@ -39,7 +39,7 @@ public class Activity {
 	@ColumnDefault("0")
 	private Integer version;
 	
-	@JsonIgnore
+	
 	@OneToMany(mappedBy = "activity", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<Mark> marks = new ArrayList<>();
 
