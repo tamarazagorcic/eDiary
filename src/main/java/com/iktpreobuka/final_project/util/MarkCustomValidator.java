@@ -5,7 +5,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import com.iktpreobuka.final_project.entities.dto.MarkDTO;
-import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 
 @Component
 public class MarkCustomValidator implements Validator{

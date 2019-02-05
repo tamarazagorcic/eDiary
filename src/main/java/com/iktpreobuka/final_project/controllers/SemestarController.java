@@ -54,7 +54,7 @@ public class SemestarController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSemestarsAdmin() {
@@ -77,7 +77,7 @@ public class SemestarController {
 
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySemestarId(@PathVariable Long id) {
@@ -96,7 +96,7 @@ public class SemestarController {
 		}
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSemestar(@Valid @RequestBody SemestarDTO newSemestar, BindingResult result) {
@@ -123,7 +123,7 @@ public class SemestarController {
 		
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateSemestar(@Valid @RequestBody SemestarDTO newSemestar,@PathVariable Long id, 
@@ -170,7 +170,7 @@ public class SemestarController {
 		}
 	}
 	
-	@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySemestarId(@PathVariable Long id) {

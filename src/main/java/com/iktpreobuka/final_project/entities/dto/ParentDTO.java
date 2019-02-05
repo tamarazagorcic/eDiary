@@ -45,6 +45,7 @@ public class ParentDTO {
 	private UserDTO parentUser;
 	
 	@JsonIgnore
+	//@JsonView(View.Public.class)
 	@JsonBackReference("parentpupils")	
 	private List<PupilDTO> parent_pupils;
 

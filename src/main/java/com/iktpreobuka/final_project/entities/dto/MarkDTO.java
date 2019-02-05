@@ -14,7 +14,7 @@ import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class MarkDTO {
 
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)

@@ -64,28 +64,8 @@ public class ParentController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	@Secured("ROLE_PUPIL")
-	@JsonView(View.Private.class)
-	@RequestMapping(method = RequestMethod.GET, value = "/private")
-	public ResponseEntity<?> getAllParentsPrivate() {
-		try {
-			List<ParentDTO> list = new ArrayList<>();
-			for (Parent parent : parentService.getAllParents()) {
-				ParentDTO parentDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),parent.getCode());
-				list.add(parentDTO);
-			}
-			if (list.size() != 0) {
-				return new ResponseEntity<Iterable<ParentDTO>>(list, HttpStatus.OK);
-			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Parents"),
-					HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
 
-	}
-	@Secured("ROLE_PARENT")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllParentsAdmin() {
@@ -106,7 +86,7 @@ public class ParentController {
 		}
 
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByParentId(@PathVariable Long id) {
@@ -124,7 +104,7 @@ public class ParentController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewParent(@Valid @RequestBody ParentDTO newParent, BindingResult result) {
@@ -164,7 +144,7 @@ public class ParentController {
 	}
 	
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateParent(@Valid @RequestBody ParentDTO newParent,@PathVariable Long id, 
@@ -202,7 +182,7 @@ public class ParentController {
 		}
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByParentId(@PathVariable Long id) {

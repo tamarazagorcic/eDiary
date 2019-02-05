@@ -17,7 +17,7 @@ import com.iktpreobuka.final_project.util.View;
 public class ProfessorDTO {
 
 	//@JsonIgnore
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)
@@ -41,7 +41,7 @@ public class ProfessorDTO {
 	@JsonView(View.Public.class)
 	private List<SubjectDTO> subjects;
 	
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private UserDTO professorUser;
 	
 	

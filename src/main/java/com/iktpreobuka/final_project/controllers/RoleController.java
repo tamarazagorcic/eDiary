@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -52,7 +53,7 @@ public class RoleController {
 	}
 	
 	
-	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> getAllRoles() {
@@ -76,7 +77,7 @@ public class RoleController {
 
 	}
 	
-	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByRoleId(@PathVariable Long id) {
@@ -97,7 +98,7 @@ public class RoleController {
 		}
 	}
 	
-	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewRole(@Valid @RequestBody RoleDTO newRole, BindingResult result) {
@@ -115,7 +116,7 @@ public class RoleController {
 	}
 	
 	
-	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateRole(@Valid @RequestBody RoleDTO newRole,@PathVariable Long id, 
@@ -144,7 +145,7 @@ public class RoleController {
 		}
 	}
 	
-	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByRoleId(@PathVariable Long id) {

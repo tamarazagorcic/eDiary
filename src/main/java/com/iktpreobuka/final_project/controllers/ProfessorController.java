@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -74,7 +75,7 @@ public class ProfessorController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	//@Secured("admin")
+	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/public")
 	public ResponseEntity<?> getAllProfessorsPublic() {
@@ -102,7 +103,7 @@ public class ProfessorController {
 		}
 
 	}
-	//@Secured("admin")
+	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllProfessorsPrivate() {
@@ -129,7 +130,7 @@ public class ProfessorController {
 		}
 
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllProfessorsAdmin() {
@@ -157,7 +158,7 @@ public class ProfessorController {
 
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByProfessorId(@PathVariable Long id) {
@@ -181,7 +182,7 @@ public class ProfessorController {
 		}
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewProfessor(@Valid @RequestBody ProfessorDTO newProfessor, BindingResult result) {
@@ -217,7 +218,7 @@ public class ProfessorController {
 	}
 	
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateProfessor(@Valid @RequestBody ProfessorDTO newProfessor,@PathVariable Long id, 
@@ -259,7 +260,7 @@ public class ProfessorController {
 		}
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByProfessorId(@PathVariable Long id) {
@@ -287,6 +288,7 @@ public class ProfessorController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/subject/{idS}")
 	public ResponseEntity<?> deleteConectionPS(@PathVariable Long id, @PathVariable Long idS) {
@@ -315,7 +317,7 @@ public class ProfessorController {
 		}
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}")
 	public ResponseEntity<?> conectionProfessorSubject(@PathVariable Long idP, @PathVariable Long idS) {
@@ -346,6 +348,7 @@ public class ProfessorController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/subject/{idS}/class/{idSC}")
 	public ResponseEntity<?> deleteConectionPSC(@PathVariable Long id, @PathVariable Long idS,@PathVariable Long idSC ) {

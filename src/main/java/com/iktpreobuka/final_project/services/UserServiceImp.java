@@ -1,10 +1,12 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.final_project.entities.Role;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.repositories.RoleRepository;
 import com.iktpreobuka.final_project.repositories.UserRepository;
@@ -84,5 +86,7 @@ public boolean ifExistsEmail(String email) {
 		
 	}
 	
-	
+	public List<User> findByRole(Role role) {
+		return userRepo.findByRole(role); 
+	}
 }

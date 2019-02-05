@@ -45,7 +45,8 @@ public class User {
 	@OneToMany(mappedBy = "user_id", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private List<Professor> professors = new ArrayList<>();
 	
-	
+	@OneToMany(mappedBy = "user_id", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	private List<Administrator> admin = new ArrayList<>();
 	
 	public Long getId() {
 		return id;
@@ -92,6 +93,30 @@ public class User {
 		this.email = email;
 		this.password = password;
 		this.username = username;
+	}
+	public List<Pupil> getPupils() {
+		return pupils;
+	}
+	public void setPupils(List<Pupil> pupils) {
+		this.pupils = pupils;
+	}
+	public List<Parent> getParents() {
+		return parents;
+	}
+	public void setParents(List<Parent> parents) {
+		this.parents = parents;
+	}
+	public List<Professor> getProfessors() {
+		return professors;
+	}
+	public void setProfessors(List<Professor> professors) {
+		this.professors = professors;
+	}
+	public List<Administrator> getAdmin() {
+		return admin;
+	}
+	public void setAdmin(List<Administrator> admin) {
+		this.admin = admin;
 	}
 	
 	

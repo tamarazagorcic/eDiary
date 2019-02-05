@@ -9,26 +9,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.entities.Role;
 import com.iktpreobuka.final_project.util.View;
-@JsonView(View.Admin.class)
+
 public class UserDTO {
 
-	@JsonIgnore
+	//@JsonIgnore
+	@JsonView(View.Admin.class)
 	private Long id;
 	
+	@JsonView(View.Public.class)
 	@NotNull(message = "Email must be provided.")
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", 
 	message="Email is not valid.")
 	private String email;
 	
+	@JsonView(View.Admin.class)
 	@NotBlank(message = "Password must be provided.")
 	@Pattern(regexp = "^\\S*$", message = "Password must not contain white space.")
 	@Size(min=5, max=10, message = "Password must be between {min} and {max} characters long.")
 	private String password;
 	
 	
-	
+	@JsonView(View.Admin.class)
 	private String confirmPassword;
 	
+	@JsonView(View.Public.class)
 	//obicno se stavlja da ima veliko slovo i neki karakter "^[A-Z]+[a-z]+[0-9-\\+]+$"
 	@NotBlank(message = "Username must be provided.")
 	@Size(min=5, max=15, message = "Username must be between {min} and {max} characters long.")
@@ -114,6 +118,23 @@ public class UserDTO {
 			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
 			RoleDTO role) {
 		super();
+		this.email = email;
+		this.username = username;
+		this.role = role;
+	}
+
+	public UserDTO(
+			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username) {
+		this.email = email;
+		this.username = username;
+	}
+
+	public UserDTO(Long id,
+			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
+			RoleDTO role) {
+		this.id = id;
 		this.email = email;
 		this.username = username;
 		this.role = role;

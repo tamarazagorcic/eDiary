@@ -42,7 +42,7 @@ public class ActivityController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
-	//@Secured("admin")
+	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/public")
 	public ResponseEntity<?> getAllActivitiesPublic() {
@@ -63,7 +63,7 @@ public class ActivityController {
 		}
 
 	}
-	//@Secured("admin")
+	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllActivitiesPrivate() {
@@ -84,7 +84,7 @@ public class ActivityController {
 		}
 
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllActivitiesAdmin() {
@@ -106,8 +106,8 @@ public class ActivityController {
 
 	}
 
-	@Secured("admin")
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByActivityId(@PathVariable Long id) {
 
@@ -124,7 +124,7 @@ public class ActivityController {
 		}
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewActivity(@Valid @RequestBody ActivityDTO newActivity, BindingResult result) {
@@ -147,7 +147,7 @@ public class ActivityController {
 		
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateActivity(@Valid @RequestBody ActivityDTO newActivity,@PathVariable Long id, 
@@ -187,7 +187,7 @@ public class ActivityController {
 		}
 	}
 
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByActivityId(@PathVariable Long id) {

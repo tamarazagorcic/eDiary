@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -99,7 +100,7 @@ public class MarkController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
-	// @Secured("ROLE_ADMIN")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByMarkId(@PathVariable Long id) {
@@ -135,8 +136,9 @@ public class MarkController {
 		}
 	}
 
-	@JsonView(View.Private.class)
-	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	@Secured("ROLE_ADMIN")
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> getAllMarksPrivate() {
 		try {
 			List<MarkDTO> list = new ArrayList<>();
@@ -174,7 +176,8 @@ public class MarkController {
 
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewMark(@Valid @RequestBody MarkDTO newMark, BindingResult result) {
 		if (result.hasErrors()) {
@@ -242,7 +245,8 @@ public class MarkController {
 		
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateMark(@Valid @RequestBody MarkDTO newMark, @PathVariable Long id,
 			BindingResult result) {
@@ -288,8 +292,9 @@ public class MarkController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	@JsonView(View.Admin.class)
+	
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Long id) {
 
@@ -326,7 +331,8 @@ public class MarkController {
 		}
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PUPIL"})
+	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
 	public ResponseEntity<?> findMarksByPupilId(@PathVariable Long id) {
 
@@ -377,7 +383,8 @@ public class MarkController {
 		}
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR","ROLE_PUPIL"})
+	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/professor/{idPr}/subject/{idS}/pupil/{idPu}")
 	public ResponseEntity<?> findMarksByProfessorAndPupilId(@PathVariable Long idPr, @PathVariable Long idS,
 			@PathVariable Long idPu) {
@@ -434,7 +441,8 @@ public class MarkController {
 		}
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/professor/{idPr}/subject/{idS}/class/{idSc}")
 	public ResponseEntity<?> findMarksByProfessorAndClass(@PathVariable Long idPr, @PathVariable Long idS,
 			@PathVariable Long idSc) {
@@ -488,7 +496,8 @@ public class MarkController {
 		}
 	}
 
-	@JsonView(View.Admin.class)
+	@Secured({"ROLE_ADMIN", "ROLE_PARENT"})
+	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/parent/{id}")
 	public ResponseEntity<?> findMarksByParent(@PathVariable Long id) {
 

@@ -13,7 +13,7 @@ import com.iktpreobuka.final_project.util.View;
 
 public class SubjectDTO {
 
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)

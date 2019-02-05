@@ -21,7 +21,7 @@ import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class SchoolClassDTO {
 
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private Long id;
 	
 	@JsonView(View.Admin.class)
@@ -44,7 +44,7 @@ public class SchoolClassDTO {
 	@Size(min=1, max=30, message = "Name must be between {min} and {max} characters long.")
 	private String name;
 	
-	@JsonView(View.Public.class)
+	@JsonView(View.Private.class)
 	private List<PupilDTO> pupilsAttendingClass;
 
 

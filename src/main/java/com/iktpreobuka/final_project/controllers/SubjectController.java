@@ -55,7 +55,49 @@ public class SubjectController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
-	// @Secured("admin")
+	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/public")
+	public ResponseEntity<?> getAllSubjectsPublic() {
+		try {
+			List<SubjectDTO> list = new ArrayList<>();
+			for (Subject subject : subjectService.getAllSubject()) {
+				SubjectDTO subjectDTO = new SubjectDTO(subject.getId(), subject.getName(), subject.getCode());
+				list.add(subjectDTO);
+			}
+			if (list.size() != 0) {
+				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
+					HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	public ResponseEntity<?> getAllSubjectsPrivate() {
+		try {
+			List<SubjectDTO> list = new ArrayList<>();
+			for (Subject subject : subjectService.getAllSubject()) {
+				SubjectDTO subjectDTO = new SubjectDTO(subject.getId(), subject.getName(), subject.getCode());
+				list.add(subjectDTO);
+			}
+			if (list.size() != 0) {
+				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
+					HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllSubjectsAdmin() {
@@ -77,7 +119,7 @@ public class SubjectController {
 
 	}
 
-	// @Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySubjectId(@PathVariable Long id) {
@@ -96,7 +138,7 @@ public class SubjectController {
 		}
 	}
 
-	// @Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSubject(@Valid @RequestBody SubjectDTO newSubject, BindingResult result) {
@@ -122,7 +164,7 @@ public class SubjectController {
 		return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 	}
 
-	// @Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateActivity(@Valid @RequestBody SubjectDTO newSubject, @PathVariable Long id,
@@ -167,7 +209,7 @@ public class SubjectController {
 		}
 	}
 
-	// @Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteBySubjectId(@PathVariable Long id) {

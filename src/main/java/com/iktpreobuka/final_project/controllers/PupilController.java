@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -71,33 +72,33 @@ public class PupilController {
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
-	
-	//@Secured("admin")
-	@JsonView(View.Private.class)
-	@RequestMapping(method = RequestMethod.GET, value = "/private")
-	public ResponseEntity<?> getAllPupilsPrivate() {
-		try {
-			List<PupilDTO> list = new ArrayList<>();
-			for (Pupil pupil : pupilService.getAll()) {
-				Parent pt = pupil.getParent();
-				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
-				
-				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
-						ptDTO);
-				list.add(pupilDTO);
-			}
-			if (list.size() != 0) {
-				return new ResponseEntity<Iterable<PupilDTO>>(list, HttpStatus.OK);
-			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Pupils"),
-					HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-	}
-	//@Secured("admin")
+//	
+//	@Secured("ROLE_ADMIN")
+//	@JsonView(View.Admin.class)
+//	@RequestMapping(method = RequestMethod.GET, value = "/private")
+//	public ResponseEntity<?> getAllPupilsPrivate() {
+//		try {
+//			List<PupilDTO> list = new ArrayList<>();
+//			for (Pupil pupil : pupilService.getAll()) {
+//				Parent pt = pupil.getParent();
+//				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
+//				
+//				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
+//						ptDTO);
+//				list.add(pupilDTO);
+//			}
+//			if (list.size() != 0) {
+//				return new ResponseEntity<Iterable<PupilDTO>>(list, HttpStatus.OK);
+//			}
+//			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Pupils"),
+//					HttpStatus.BAD_REQUEST);
+//		} catch (Exception e) {
+//			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+//					HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//
+//	}
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllPupilsAdmin() {
@@ -123,7 +124,7 @@ public class PupilController {
 
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByPupilId(@PathVariable Long id) {
@@ -144,7 +145,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewPupil(@Valid @RequestBody PupilDTO newPupil, BindingResult result) {
@@ -212,7 +213,7 @@ public class PupilController {
 	
 	
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updatePupil(@Valid @RequestBody PupilDTO newPupil,@PathVariable Long id, 
@@ -261,7 +262,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByPupilId(@PathVariable Long id) {
@@ -291,6 +292,7 @@ public class PupilController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/class/{idSC}")
 	public ResponseEntity<?> deleteByPupilInClass(@PathVariable Long id, @PathVariable Long idSC) {

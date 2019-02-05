@@ -1,7 +1,9 @@
 package com.iktpreobuka.final_project.services;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.iktpreobuka.final_project.entities.Role;
 import com.iktpreobuka.final_project.entities.User;
 
 public interface UserService {
@@ -14,6 +16,6 @@ public interface UserService {
 	 User addNewUserWithoutRole(User newUser);
 	 boolean ifExists(String username);
 	 boolean ifExistsEmail(String email);
-	 
+	 List<User> findByRole(Role role);
 	 
 }

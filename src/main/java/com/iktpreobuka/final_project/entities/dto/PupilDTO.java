@@ -17,7 +17,7 @@ import com.iktpreobuka.final_project.util.View;
 public class PupilDTO {
 
 	
-	@JsonView(View.Admin.class)
+	@JsonView(View.Private.class)
 	private Long id;
 	
 	@JsonView(View.Public.class)
@@ -33,7 +33,7 @@ public class PupilDTO {
 	@Size(min=2, max=30, message = "Surname must be between {min} and {max} characters long.")
 	private String surname;
 	
-	@JsonView(View.Private.class)	
+	@JsonView(View.Admin.class)	
 	@NotNull(message = "JMBG must be provided.")
 	@Pattern(regexp="^[0-9]{13}$")
 	private String jmbg;
@@ -44,7 +44,7 @@ public class PupilDTO {
 	@Size(min=1, max=30, message = "Code must be between {min} and {max} characters long.")
 	private String code;
 	
-	@JsonView(View.Admin.class)
+	@JsonView(View.Public.class)
 	private List<SchoolClassDTO> schoolClassDTO;
 	
 //	@JsonIgnore
@@ -52,11 +52,11 @@ public class PupilDTO {
 //	private List<PupilsInClass> schoolClasses;
 	
 	
-	@JsonView(View.Private.class)
+	@JsonView(View.Public.class)
 //	@JsonManagedReference("parentpupils")
 	private ParentDTO parent;
 	
-	@JsonView(View.Admin.class)
+	@JsonView(View.Public.class)
 	private UserDTO pupilUser;
 	
 	

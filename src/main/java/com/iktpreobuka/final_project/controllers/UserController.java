@@ -62,7 +62,7 @@ public class UserController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
 	public ResponseEntity<?> getAllUsersAdmin() {
@@ -88,7 +88,7 @@ public class UserController {
 	}
 	
 	
-	@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByUserId(@PathVariable Long id) {
@@ -109,7 +109,7 @@ public class UserController {
 		}
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewUser(@Valid @RequestBody UserDTO newUser, BindingResult result) {
@@ -155,7 +155,7 @@ public class UserController {
 
 	}
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO newUser,@PathVariable Long id, 
@@ -200,6 +200,7 @@ public class UserController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "passwordChange/{id}")
 	public ResponseEntity<?> updateUserPassword(@Valid @RequestBody PasswordDTO newUser,@PathVariable Long id,BindingResult result) {
@@ -235,7 +236,7 @@ public class UserController {
 	
 	
 	
-	//@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	public ResponseEntity<?> deleteByUserId(@PathVariable Long id) {
@@ -257,7 +258,7 @@ public class UserController {
 	}
 	
 	
-	@Secured("admin")
+	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idUser}/role/{idRole}")
 	public ResponseEntity<?> matchUserWithRole(@PathVariable Long idUser, @PathVariable Long idRole) {

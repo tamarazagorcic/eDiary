@@ -1,19 +1,15 @@
 package com.iktpreobuka.final_project.services;
 
-import java.util.List;
+
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Parent;
-import com.iktpreobuka.final_project.entities.Role;
-import com.iktpreobuka.final_project.entities.SchoolClass;
-import com.iktpreobuka.final_project.entities.Semestar;
+
 import com.iktpreobuka.final_project.repositories.ParentRepository;
 
 @Service
@@ -49,9 +45,9 @@ public class ParentServiceImpl implements ParentService {
 
 		temp.setName(newParent.getName());
 		temp.setSurname(newParent.getSurname());
-		//temp.setEmail(newParent.getEmail());
 		temp.setCode(newParent.getCode());
 		temp.setVersion(newParent.getVersion());
+		temp.setUser_id(newParent.getUser_id());
 		
 
 		return parentRepo.save(temp);
