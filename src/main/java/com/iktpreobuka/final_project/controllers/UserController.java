@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +43,7 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/user")
 public class UserController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
 	private UserService userService;
@@ -76,11 +79,14 @@ public class UserController {
 				list.add(userDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all users. ");
 				return new ResponseEntity<Iterable<UserDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all users. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Users"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -100,10 +106,13 @@ public class UserController {
 				RoleDTO roleDTO = new RoleDTO(role.getName());
 
 				UserDTO userDTO = new UserDTO(user.get().getEmail(), user.get().getPassword(), user.get().getUsername(),roleDTO);
+				logger.info("You successfuly listed user with given id. ");
 				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing user with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -114,6 +123,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewUser(@Valid @RequestBody UserDTO newUser, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new user. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			userValidator.validate(newUser, result);
@@ -121,11 +131,14 @@ public class UserController {
 		}
 
 		if(userService.ifExists(newUser.getUsername())) {
+			logger.error("Username for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExistsEmail(newUser.getEmail())) {
+			logger.error("Email for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
 
 		}if(newUser.getRole().getName().isEmpty()) {
+			logger.error("Name for role must be provided. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Name for role must be provided."), HttpStatus.BAD_REQUEST);
 		}
 
@@ -147,10 +160,12 @@ public class UserController {
 //			roleService.addNewRole(role);
 //			User newuserEntity = new User(newUser.getEmail(), newUser.getPassword(), newUser.getUsername(),role);
 //			userService.addNewUserWithoutRole(newuserEntity);
+			logger.error("Role must be set already for this operation to succeed. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Role must be set already for this operation to succeed."), HttpStatus.BAD_REQUEST);
 
 			
 		}
+		logger.info("You successfuly posted user. ");
 		return new ResponseEntity<>(newUser, HttpStatus.OK);
 
 	}
@@ -163,6 +178,7 @@ public class UserController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating user. Check input values.");
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 				} else {
 					userValidator.validate(newUser, result);
@@ -173,28 +189,33 @@ public class UserController {
 				
 				if(!user.get().getUsername().equals(newUser.getUsername())) {
 					if(userService.ifExists(newUser.getUsername())) {
+						logger.error("Username for user is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is already present"), HttpStatus.BAD_REQUEST);
 					}
 					user.get().setUsername(newUser.getUsername());
 				}if(!user.get().getEmail().equals(newUser.getEmail())) {
 					if(userService.ifExistsEmail(newUser.getEmail())) {
+						logger.error("Email for user is already present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is already present"), HttpStatus.BAD_REQUEST);
 					}
 					user.get().setEmail(newUser.getEmail());
 				}
 				
 				if (!roleService.ifExists(newUser.getRole().getName())) {
+					logger.error("Role must be already present. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Role must be already present"), HttpStatus.BAD_REQUEST);
 
 				}
 				Role role = roleService.findByName(newUser.getRole().getName());
 				user.get().setRole(role);
 				userService.updateUser(id, user.get());
-
+				logger.info("You successfuly updated user. ");
 				return new ResponseEntity<>(newUser, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating user with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -213,9 +234,11 @@ public class UserController {
 			if (user.isPresent()) {
 				
 				if(!user.get().getPassword().equals(newUser.getOldPassword())) {
+					logger.error("Old password does not match. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Old password does not match."), HttpStatus.BAD_REQUEST);
 
 				}if(!newUser.getNewPassword().equals(newUser.getNewConfirmPassword())) {
+					logger.error("Password and confirmation of password does not match. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Password and confirmation of password does not match."), HttpStatus.BAD_REQUEST);
 
 				}
@@ -224,11 +247,13 @@ public class UserController {
 				userService.updateUser(id, user.get());
 				RoleDTO roleDTO = new RoleDTO(user.get().getRole().getName());
 				UserDTO userDTO = new UserDTO(user.get().getEmail(),user.get().getUsername(),roleDTO);
-
+				logger.info("You successfuly changed password for user. ");
 				return new ResponseEntity<>(userDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when changing password for user with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -248,10 +273,13 @@ public class UserController {
 				RoleDTO roleDTO = new RoleDTO(user.get().getRole().getName());
 				UserDTO userDTO = new UserDTO(user.get().getEmail(), user.get().getPassword(), user.get().getUsername(),roleDTO);
 				userService.deleteUser(id);
+				logger.info("You successfuly deleted user. ");
 				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when deleting user with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "User not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -274,11 +302,13 @@ public class UserController {
 			RoleDTO roleDTO = new RoleDTO(role.get().getName());
 			
 			UserDTO userDTO = new UserDTO(user.get().getEmail(), user.get().getPassword(), user.get().getUsername(),roleDTO);
-			
+			logger.info("You successfuly conected user whith role. ");
 				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when conecting user with role for given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "User or role not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

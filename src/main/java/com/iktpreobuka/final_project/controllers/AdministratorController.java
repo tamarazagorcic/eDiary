@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,7 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/admin")
 public class AdministratorController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private AdministratorService adminService;
@@ -72,11 +75,14 @@ public class AdministratorController {
 				list.add(adminDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all administrators. ");
 				return new ResponseEntity<Iterable<AdministratorDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all administrators. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Admins"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -95,10 +101,13 @@ public class AdministratorController {
 							admin.get().getUser_id().getUsername(),roleDTO);
 					AdministratorDTO adminDTO = new AdministratorDTO(admin.get().getId(),admin.get().getName(),
 							admin.get().getSurname(),admin.get().getCode(),userDTO);
+					logger.info("You successfuly listed administrator. " + adminDTO.getName() + adminDTO.getSurname());
 					return new ResponseEntity<AdministratorDTO>(adminDTO, HttpStatus.OK);
 				}
+				logger.error("Something went wrong when listing administrator with given id. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Admin not present"), HttpStatus.BAD_REQUEST);
 			} catch (Exception e) {
+				logger.error("Something went wrong. ");
 				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
@@ -109,16 +118,20 @@ public class AdministratorController {
 		@RequestMapping(method = RequestMethod.POST)
 		public ResponseEntity<?> addNewAdmin(@Valid @RequestBody AdministratorDTO newAdmin, BindingResult result) {
 			if (result.hasErrors()) {
+				logger.warn("Something went wrong in posting new admin. Check input values.");
 				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}else{
 			adminValidator.validate(newAdmin, result);
 		}
 			
 			if(adminService.ifExists(newAdmin.getCode())) {
+				logger.error("Code for admin is present. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Code for admin is present"), HttpStatus.BAD_REQUEST);
 			}if(userService.ifExists(newAdmin.getAdminUser().getUsername())) {
+				logger.error("Username for user is present. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
 			}if(userService.ifExistsEmail(newAdmin.getAdminUser().getEmail())) {
+				logger.error("Email for user is present. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
 
 			}
@@ -136,7 +149,8 @@ public class AdministratorController {
 					savedAdministrator.getUser_id().getUsername(),roleDTO);
 			AdministratorDTO adminDTO = new AdministratorDTO(savedAdministrator.getId(),savedAdministrator.getName(),
 					savedAdministrator.getSurname(),savedAdministrator.getCode(),userDTO);
-			
+			logger.info("You successfuly posted administrator. " + adminDTO.getName() + adminDTO.getSurname());
+
 			return new ResponseEntity<>(adminDTO, HttpStatus.OK);
 		}
 		
@@ -148,13 +162,17 @@ public class AdministratorController {
 
 			try {
 				if (result.hasErrors()) {
+					logger.error("Something went wrong in posting new admin. Check input values.");
 						return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+					}else {
+						adminValidator.validate(newAdmin, result);
 					}
 
 				Optional<Administrator> admin = adminService.findById(id);
 				if (admin.isPresent()) {
 					if(!admin.get().getCode().equals(newAdmin.getCode())) {
 						if(adminService.ifExists(newAdmin.getCode())) {
+							logger.error("Code for admin is present. ");
 							return new ResponseEntity<RESTError>(new RESTError(1, "Code for admin is present"), HttpStatus.BAD_REQUEST);
 						}else {
 							admin.get().setCode(newAdmin.getCode());
@@ -168,11 +186,13 @@ public class AdministratorController {
 
 					AdministratorDTO adminDTO = new AdministratorDTO(admin.get().getId(),admin.get().getName(),
 							admin.get().getSurname(),admin.get().getCode());
-					
+					logger.info("You successfuly updated administrator. " + adminDTO.getName() + adminDTO.getSurname());
 					return new ResponseEntity<>(adminDTO, HttpStatus.OK);
 				}
+				logger.error("Something went wrong when updating administrator with given id. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Admin not present"), HttpStatus.BAD_REQUEST);
 			} catch (Exception e) {
+				logger.error("Something went wrong. ");
 				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
@@ -188,6 +208,7 @@ public class AdministratorController {
 				if (admin.isPresent()) {
 					List<User> user = userService.findByRole(admin.get().getUser_id().getRole());
 					if(user.size()<=1) {
+						logger.error("You can not delete admin if there is no other admin activ. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete admin if there is no other admin activ."), HttpStatus.BAD_REQUEST);
 
 					}else {
@@ -195,11 +216,14 @@ public class AdministratorController {
 							admin.get().getCode());
 						userService.deleteUser(admin.get().getUser_id().getId());
 						adminService.deleteAdministrator(id);
+						logger.info("You successfuly deleted administrator. " + adminDTO.getName() + adminDTO.getSurname());
 						return new ResponseEntity<AdministratorDTO>(adminDTO, HttpStatus.OK);
 					}
 				}
+				logger.error("Something went wrong when deleting administrator with given id. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Admin not present"), HttpStatus.BAD_REQUEST);
 			} catch (Exception e) {
+				logger.error("Something went wrong. ");
 				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			}

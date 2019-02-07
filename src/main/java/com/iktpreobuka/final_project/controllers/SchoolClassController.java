@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,8 @@ import com.iktpreobuka.final_project.util.View;
 @RestController
 @RequestMapping(path = "/project/schoolclass")
 public class SchoolClassController {
+	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private SchoolClassService scService;
@@ -95,11 +99,14 @@ public class SchoolClassController {
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all school classes. ");
 				return new ResponseEntity<Iterable<SchoolClassDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all school classes. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all school classes"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -121,11 +128,14 @@ public class SchoolClassController {
 				list.add(schoolClassDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all school classes. ");
 				return new ResponseEntity<Iterable<SchoolClassDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all school classes. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all school classes"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -153,10 +163,13 @@ public class SchoolClassController {
 				}
 						SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getId(),sc.get().getCode(), 
 								sc.get().getGrade(), smDTO, sc.get().getName(),pupilsInClass);
+						logger.info("You successfuly listed school class " + scDTO.getName());
 				return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing school class with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -167,6 +180,7 @@ public class SchoolClassController {
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new school class. Check input values. ");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			scValidator.validate(newSchoolClass, result);
@@ -174,6 +188,8 @@ public class SchoolClassController {
 		}
 
 		if(scService.ifExistsCode(newSchoolClass.getCode())) {
+			logger.error("Code for school class is already in use. ");
+
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for school class is already in use."), HttpStatus.BAD_REQUEST);
 
 		}if (smService.ifExists(newSchoolClass.getSemestarDTO().getCode())) {
@@ -187,9 +203,11 @@ public class SchoolClassController {
 
 				scService.addNew(newSCE);
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(newSCE.getId(),newSCE.getCode(), newSCE.getGrade(), smDTO,newSCE.getName());
+				logger.info("You successfuly posted school class "+ schoolClassDTO.getName());
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 		
 		}else {
+			logger.error("Semestar not present when adding new school class. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		}
 		
@@ -205,6 +223,7 @@ public class SchoolClassController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating school class. Check input values. ");
 				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			} else {
 				scValidator.validate(newSchoolClass, result);
@@ -214,6 +233,8 @@ public class SchoolClassController {
 			if (sc.isPresent()) {
 				if(!sc.get().getCode().equals(newSchoolClass.getCode())) {
 					if(scService.ifExistsCode(newSchoolClass.getCode())) {
+						logger.error("Code for school class is already in use. ");
+
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for school class is already in use."), HttpStatus.BAD_REQUEST);
 
 					}else {
@@ -228,6 +249,7 @@ public class SchoolClassController {
 					Semestar semestar = smService.findByCode(newSchoolClass.getSemestarDTO().getCode());
 					sc.get().setSemestar(semestar);
 				}else {
+					logger.error("Semestar not present when updating new school class. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 				}
 			
@@ -237,11 +259,13 @@ public class SchoolClassController {
 						savedSchoolClass.getSemestar().getEndDate(), savedSchoolClass.getSemestar().getCode(),savedSchoolClass.getSemestar().isActive());
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(savedSchoolClass.getId(),savedSchoolClass.getCode(), 
 						savedSchoolClass.getGrade(), semestarDTO,savedSchoolClass.getName());
-				
+				logger.info("You successfuly updated school class "+ schoolClassDTO.getName());
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating school class with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -258,6 +282,7 @@ public class SchoolClassController {
 
 				List<PupilsInClass> pupilInClass = scService.findConectionBySchoolClass(sc.get());
 				if(pupilInClass.size() !=0) {
+					logger.error("You can not delete school class when there are pupils conected to it. ");
 							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete school class when there are pupils conected to it."), HttpStatus.BAD_REQUEST);
 
 				}else {
@@ -266,11 +291,14 @@ public class SchoolClassController {
 				
 					SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getId(),sc.get().getCode(), sc.get().getGrade(),smDTO,sc.get().getName());
 					scService.delete(id);
+					logger.info("You successfuly deleted school class "+ scDTO.getName());
 					return new ResponseEntity<SchoolClassDTO>(scDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting school class with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "School class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -294,13 +322,17 @@ public class SchoolClassController {
 				}
 
 				if (list.size() != 0) {
+					logger.info("You successfuly listed school classes for pupil. ");
 
 					return new ResponseEntity<Iterable<SchoolClassDTO>>(list, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when listing school classes for pupil with given id. ");
+
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all school classes"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -333,13 +365,16 @@ public class SchoolClassController {
 						p.get().getCode(), list, ptDTO);
 
 				if (list.size() != 0) {
+					logger.info("You successfuly listed school classes for pupil. ");
 
 					return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when listing school classes for pupil with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all school classes"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -374,10 +409,15 @@ public class SchoolClassController {
 				
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
 						smDTO,sc.get().getName(),list);
+				logger.info("You successfuly added conection between pupil and school class. ");
+
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when adding conection pupil and school class with given id. ");
+
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil or School class are not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -410,10 +450,14 @@ public class SchoolClassController {
 				
 				SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.get().getCode(),sc.get().getGrade(),
 						smDTO, sc.get().getName());
+				logger.info("You successfuly added conection betweenprofessor, subject and school class. ");
+
 				return new ResponseEntity<>(schoolClassDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when adding conection between professor, subject and school class with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor or subject or school class are not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +48,7 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/professor")
 public class ProfessorController {
 
-
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private ProfessorService professorService;
 
@@ -93,11 +95,14 @@ public class ProfessorController {
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all professors. ");
 				return new ResponseEntity<Iterable<ProfessorDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all professors. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Professors"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -120,11 +125,14 @@ public class ProfessorController {
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all professors. ");
 				return new ResponseEntity<Iterable<ProfessorDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all professors. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Professors"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -147,11 +155,14 @@ public class ProfessorController {
 				list.add(professorDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all professors. ");
 				return new ResponseEntity<Iterable<ProfessorDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all professors. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Professors"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -173,10 +184,13 @@ public class ProfessorController {
 				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getId(),professor.get().getName(),professor.get().getSurname(),
 						professor.get().getCode(),listSubjectDTO);
+				logger.info("You successfuly listed professor. ");
 				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing professor with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -193,10 +207,13 @@ public class ProfessorController {
 		}
 
 		if(professorService.ifExists(newProfessor.getCode())) {
+			logger.error("Code for professor is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for professor is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExists(newProfessor.getProfessorUser().getUsername())) {
+			logger.error("Username for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExistsEmail(newProfessor.getProfessorUser().getEmail())) {
+			logger.error("Email for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
 
 		}
@@ -213,7 +230,7 @@ public class ProfessorController {
 		ProfessorDTO professorDTO = new ProfessorDTO(savedProfessor.getId(),savedProfessor.getName(),
 				savedProfessor.getSurname(),savedProfessor.getCode(),userDTO);
 		
-
+		logger.info("You successfuly posted professor. ");
 		return new ResponseEntity<>(professorDTO, HttpStatus.OK);
 	}
 	
@@ -233,6 +250,7 @@ public class ProfessorController {
 			if (professor.isPresent()) {
 				if(!professor.get().getCode().equals(newProfessor.getCode())) {
 					if(professorService.ifExists(newProfessor.getCode())) {
+						logger.error("Code for professor is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for professor is present"), HttpStatus.BAD_REQUEST);
 					}else {
 						professor.get().setCode(newProfessor.getCode());
@@ -250,11 +268,13 @@ public class ProfessorController {
 				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getId(),professor.get().getName(),professor.get().getSurname(),
 						professor.get().getCode(),listSubjectDTO);
-
+				logger.info("You successfuly updated professor. ");
 				return new ResponseEntity<>(professorDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating professor with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -278,11 +298,14 @@ public class ProfessorController {
 						professor.get().getCode());
 				userService.deleteUser(professor.get().getUser_id().getId());
 				professorService.delete(id);
+				logger.info("You successfuly deleted professor. ");
 				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when updating professor with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -300,18 +323,22 @@ public class ProfessorController {
 				Optional<ProfessorSubject> ps = professorService.findByProfessorSubject(professor.get(), subject.get());
 				List<ProfessorSubjectClass> psc = scService.findConectionPSC(ps.get());
 				if(psc.size() !=0) {
+					logger.error("You can not remove professor and subject because there is conection to school class. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "You can not remove professor and subject because there is conection to school class."), HttpStatus.BAD_REQUEST);
 
 				}else {
 					professorService.deletePS(ps.get().getId());
 					ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getId(),professor.get().getName(),professor.get().getSurname(),
 							professor.get().getCode());
+					logger.info("You successfuly deleted conection between professor and subject. ");
 					return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 				}
 				
 			}
+			logger.error("Something went wrong when deleting conection professor and subject with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -339,10 +366,13 @@ public class ProfessorController {
 				
 
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),professor.get().getSurname(),professor.get().getCode(),list);
+				logger.info("You successfuly added conection between professor and subject. ");
 				return new ResponseEntity<>(professorDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when adding conection professor and subject with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Professor not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -362,6 +392,7 @@ public class ProfessorController {
 			if (psc.isPresent()) {
 				List<Mark> marks = markService.findByClassAndSubject(psc.get());
 				if(marks.size() !=0) {
+					logger.error("You can not remove conection beetwen professor,subject and school class because there are marks in that conection. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "You can not remove conection beetwen professor,subject and school class"
 							+ " because there are marks in that conection."), HttpStatus.BAD_REQUEST);
 
@@ -369,12 +400,15 @@ public class ProfessorController {
 					scService.deletePSC(psc.get().getId());
 					ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getId(),professor.get().getName(),professor.get().getSurname(),
 							professor.get().getCode());
+					logger.info("You successfuly deleted conection between professor and subject and school class. ");
 					return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Conection beetwen professor and subject and school class not present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Conection beetwen professor and subject and school class not present"), HttpStatus.BAD_REQUEST);
 			
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,8 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/mark")
 public class MarkController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired
 	private MarkService markService;
 
@@ -127,10 +131,13 @@ public class MarkController {
 
 				MarkDTO markDTO = new MarkDTO(mark.get().getId(),professorDTO, pupilDTO, subjectDTO, scDTO, acDTO, mark.get().getValue(),
 						mark.get().getDate());
+				logger.info("You successfuly listed mark. ");
 				return new ResponseEntity<MarkDTO>(markDTO, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Activity not present"), HttpStatus.BAD_REQUEST);
+			logger.error("Something went wrong when listing mark with given id. ");
+			return new ResponseEntity<RESTError>(new RESTError(1, "Mark not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -166,10 +173,13 @@ public class MarkController {
 				list.add(markDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all marks. ");
 				return new ResponseEntity<Iterable<MarkDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all marks. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all marks"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -233,12 +243,16 @@ public class MarkController {
 			}
 
 			emailService.sendSimpleMessage(object);
+			
+			logger.info("You successfuly posted mark. ");
 
 			return new ResponseEntity<>(markDTO, HttpStatus.OK);
 		}
-		return new ResponseEntity<RESTError>(new RESTError(1, "Some entities missing or adding new mark is not possible."), HttpStatus.BAD_REQUEST);
+		logger.error("Some entities missing and adding new mark is not possible. ");
+		return new ResponseEntity<RESTError>(new RESTError(1, "Some entities missing and adding new mark is not possible."), HttpStatus.BAD_REQUEST);
 
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured " + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -284,10 +298,13 @@ public class MarkController {
 				MarkDTO markDTO = new MarkDTO(professorDTO, pupilDTO, subjectDTO, scDTO, acDTO, mark.get().getValue(),
 						mark.get().getDate());
 
+				logger.info("You successfuly updated mark. ");
 				return new ResponseEntity<>(markDTO, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Activity not present"), HttpStatus.BAD_REQUEST);
+			logger.error("Something went wrong when updating mark with given id. ");
+			return new ResponseEntity<RESTError>(new RESTError(1, "Mark not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -322,10 +339,13 @@ public class MarkController {
 						mark.get().getDate());
 
 				markService.deleteMark(id);
+				logger.info("You successfuly deleted mark. ");
 				return new ResponseEntity<MarkDTO>(markDTO, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Activity not present"), HttpStatus.BAD_REQUEST);
+			logger.error("Something went wrong when deleting mark with given id. ");
+			return new ResponseEntity<RESTError>(new RESTError(1, "Mark not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -373,11 +393,14 @@ public class MarkController {
 					PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(), pupil.get().getSurname(),
 							pupil.get().getCode());
 					PupilMarkDTO pupilsMarks = new PupilMarkDTO(pupilDTO,marks);
+					logger.info("You successfuly listed all marks for pupil. " + pupilDTO.getName() + pupilDTO.getSurname() );
 					return new ResponseEntity<PupilMarkDTO>(pupilsMarks, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong while listing all marks and pupil with given id is not present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -428,14 +451,18 @@ public class MarkController {
 
 					MarksProfessorDTO marksProfessorDTO = new MarksProfessorDTO(professorDTO, pupilMarkDTO, subjectDTO,
 							scDTO);
-
+					logger.info("You successfuly listed marks for pupil "+ pupilDTO.getName() + " " + pupilDTO.getSurname()+
+							" for subject " + subjectDTO.getName());
 					return new ResponseEntity<MarksProfessorDTO>(marksProfessorDTO, HttpStatus.OK);
 				}
+				logger.error("Pupil does not have marks for this subject. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Pupil does not have marks for this subject. "),
 						HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
+			logger.error("Some entities missing and lisitng marks is not possible.");
+			return new ResponseEntity<RESTError>(new RESTError(1, "Some entities missing and lisitng marks is not possible."), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -483,14 +510,18 @@ public class MarkController {
 				}
 
 				MarksForMenyDTO marksDTO = new MarksForMenyDTO(professorDTO, pupils, subjectDTO, scDTO);
+				logger.info("You successfuly listed marks for school class "+ scDTO.getName() +
+						" for subject " + subjectDTO.getName());
 				return new ResponseEntity<MarksForMenyDTO>(marksDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong. There is no conection between Professor and Subject and School Class that you are trying to get.");
 			return new ResponseEntity<RESTError>(
 					new RESTError(1,
 							"Something went wrong. There is no conection between "
 									+ "Professor and Subject and School Class that you are trying to get."),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -543,15 +574,18 @@ public class MarkController {
 							pupilsMarks.add(pupilMarkDTO);
 						}
 						}catch (Exception e) {
+							logger.error("Something went wrong. ");
 						return new ResponseEntity<RESTError>(new RESTError(2, "Exception  :" + e.getMessage()),
 								HttpStatus.INTERNAL_SERVER_ERROR);
 					}	
 				}
-				
+				logger.info("You successfuly listed marks for pupil. ");
 				return new ResponseEntity<Iterable<PupilMarkDTO>>(pupilsMarks, HttpStatus.OK);
 			}
+			logger.error("Parent with given id is missing and lisitng marks is not possible.");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

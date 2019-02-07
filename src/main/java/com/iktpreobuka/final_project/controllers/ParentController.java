@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,8 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/parent")
 public class ParentController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired
 	private ParentService parentService;
 
@@ -76,11 +80,14 @@ public class ParentController {
 				list.add(parentDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all parents. ");
 				return new ResponseEntity<Iterable<ParentDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all parents. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Parents"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -96,10 +103,13 @@ public class ParentController {
 			if (parent.isPresent()) {
 				ParentDTO parentDTO = new ParentDTO(parent.get().getId(),parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
+				logger.info("You successfuly listed parent. ");
 				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing parent with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -109,16 +119,20 @@ public class ParentController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewParent(@Valid @RequestBody ParentDTO newParent, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new parent. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		}else{
 		parentValidator.validate(newParent, result);
 	}
 		
 		if(parentService.ifExists(newParent.getCode())) {
+			logger.error("Code for parent is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for parent is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExists(newParent.getParentUser().getUsername())) {
+			logger.error("Username for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExistsEmail(newParent.getParentUser().getEmail())) {
+			logger.error("Email for user is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user is present"), HttpStatus.BAD_REQUEST);
 
 		}
@@ -136,10 +150,7 @@ public class ParentController {
 		ParentDTO parentDTO = new ParentDTO(savedParent.getId(),savedParent.getName(),savedParent.getSurname(),
 				savedParent.getCode(),userDTO);
 		
-		
-		
-		
-
+		logger.info("You successfuly posted parent. ");
 		return new ResponseEntity<>(parentDTO, HttpStatus.OK);
 	}
 	
@@ -152,6 +163,7 @@ public class ParentController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating new parent. Check input values.");
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 				}
 
@@ -159,6 +171,7 @@ public class ParentController {
 			if (parent.isPresent()) {
 				if(!parent.get().getCode().equals(newParent.getCode())) {
 					if(parentService.ifExists(newParent.getCode())) {
+						logger.error("Code for parent is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for parent is present"), HttpStatus.BAD_REQUEST);
 					}else {
 						parent.get().setCode(newParent.getCode());
@@ -172,11 +185,13 @@ public class ParentController {
 
 				ParentDTO parentDTO = new ParentDTO(parent.get().getId(),parent.get().getName(),parent.get().getSurname(),
 						parent.get().getCode());
-				
+				logger.info("You successfuly updated parent. ");
 				return new ResponseEntity<>(parentDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating parent with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -192,6 +207,7 @@ public class ParentController {
 			if (parent.isPresent()) {
 				List<Pupil>pupils = pupilService.findPupilsByParent(parent.get());
 				if(pupils.size() !=0) {
+					logger.error("You can not delete parent when there are pupils in this school. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete parent when there are pupils in this school."), HttpStatus.BAD_REQUEST);
 
 				}else {
@@ -200,11 +216,14 @@ public class ParentController {
 						parent.get().getCode());
 					userService.deleteUser(parent.get().getUser_id().getId());
 					parentService.deleteParent(id);
+					logger.info("You successfuly deleted parent. ");
 					return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting parent with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

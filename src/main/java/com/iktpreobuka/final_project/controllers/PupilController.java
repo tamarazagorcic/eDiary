@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +46,7 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/pupil")
 public class PupilController {
 
-	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private PupilService pupilService;
 
@@ -113,11 +115,14 @@ public class PupilController {
 				list.add(pupilDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all pupils. ");
 				return new ResponseEntity<Iterable<PupilDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all pupils. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Pupils"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -137,10 +142,13 @@ public class PupilController {
 				
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getId(),pupil.get().getName(),pupil.get().getSurname(),
 						pupil.get().getJmbg(),pupil.get().getCode(),ptDTO);
+				logger.info("You successfuly listed pupil. ");
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing pupil with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -150,18 +158,23 @@ public class PupilController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewPupil(@Valid @RequestBody PupilDTO newPupil, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new pupil. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			pupilValidator.validate(newPupil, result);
 		
 		}
 		if(pupilService.ifExists(newPupil.getCode())) {
+			logger.error("Code for pupil is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for pupil is present"), HttpStatus.BAD_REQUEST);
 		}if(pupilService.ifExistsJMBG(newPupil.getJmbg())) {
+			logger.error("Jmbg for pupil is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Jmbg for pupil is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExists(newPupil.getPupilUser().getUsername())) {
+			logger.error("Username for user pupil is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Username for user pupil is present"), HttpStatus.BAD_REQUEST);
 		}if(userService.ifExistsEmail(newPupil.getPupilUser().getEmail())) {
+			logger.error("Email for user pupil is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Email for user pupil is present"), HttpStatus.BAD_REQUEST);
 		}
 		
@@ -179,12 +192,14 @@ public class PupilController {
 			ParentDTO ptDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),parent.getCode());
 			PupilDTO pupilDTO = new PupilDTO(newPupilEntity.getId(),newPupilEntity.getName(),newPupilEntity.getSurname(),
 					newPupilEntity.getJmbg(),newPupilEntity.getCode(),ptDTO);
-			
+			logger.info("You successfuly posted pupil. ");
 			return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
 		}else {
 			if(userService.ifExists(newPupil.getParent().getParentUser().getUsername())) {
+				logger.error("Username for user parent is present. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Username for user for parent is present"), HttpStatus.BAD_REQUEST);
 			}if(userService.ifExistsEmail(newPupil.getParent().getParentUser().getEmail())) {
+				logger.error("Username for user parent is present. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Email for user for parent is present"), HttpStatus.BAD_REQUEST);
 			}
 			User parentUser = new User(newPupil.getParent().getParentUser().getEmail(),newPupil.getParent().getParentUser().getPassword(),
@@ -205,6 +220,7 @@ public class PupilController {
 			PupilDTO pupilDTO = new PupilDTO(newPupilE.getId(),newPupilE.getName(),newPupilE.getSurname(),
 					newPupilE.getJmbg(),newPupilE.getCode(),parentDTO);
 
+			logger.info("You successfuly posted pupil. ");
 			return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
 		}
 		
@@ -221,6 +237,7 @@ public class PupilController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating new pupil. Check input values.");
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 				} else {
 					pupilValidator.validate(newPupil, result);
@@ -230,6 +247,7 @@ public class PupilController {
 			if (pupil.isPresent()) {
 				if(!pupil.get().getCode().equals(newPupil.getCode())) {
 					if(pupilService.ifExists(newPupil.getCode())) {
+						logger.error("Code for pupil is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for pupil is present"), HttpStatus.BAD_REQUEST);
 					}else {
 						pupil.get().setCode(newPupil.getCode());
@@ -245,7 +263,7 @@ public class PupilController {
 					pupil.get().setParent(parent);
 					
 				}else {
-					
+					logger.error("Parent not present. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Parent not present"), HttpStatus.BAD_REQUEST);
 				}
 				
@@ -254,10 +272,13 @@ public class PupilController {
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getId(),pupil.get().getName(),pupil.get().getSurname(),
 						pupil.get().getJmbg(),pupil.get().getCode(),parentDTO);
 
+				logger.info("You successfuly updated pupil. ");
 				return new ResponseEntity<>(pupilDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating pupil with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -273,6 +294,7 @@ public class PupilController {
 				
 				List<PupilsInClass> pupilInClass = scService.findConectionByPupil(pupil.get());
 				if(pupilInClass.size() !=0) {
+					logger.error("You can not delete pupil when there are school classes conected to him/her. ");
 							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete pupil when there are school classes conected to him/her."), HttpStatus.BAD_REQUEST);
 
 				}else {
@@ -282,11 +304,14 @@ public class PupilController {
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),pupil.get().getJmbg(),
 						pupil.get().getCode(), ptDTO);
 				pupilService.delete(id);
+				logger.info("You successfuly deleted pupil. ");
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting pupil with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -304,6 +329,7 @@ public class PupilController {
 			if(pc.isPresent()) {
 				List<Mark> marks = markService.findByPupilInClass(pc.get());
 				if(marks.size() !=0) {
+					logger.error("You can not delete pupil and school class conection when there are marks. ");
 							return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete pupil and school class conection when there are marks."), HttpStatus.BAD_REQUEST);
 
 				}else {
@@ -314,11 +340,14 @@ public class PupilController {
 				PupilDTO pupilDTO = new PupilDTO(pupil.get().getName(),pupil.get().getSurname(),pupil.get().getJmbg(),
 						pupil.get().getCode(), ptDTO);
 				scService.delete(pc.get().getId());
+				logger.info("You successfuly deleted conection between pupil and school class. ");
 				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting conection pupil and school class with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Pupil or school class not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

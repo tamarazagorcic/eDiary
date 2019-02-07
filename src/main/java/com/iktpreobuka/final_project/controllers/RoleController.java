@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,8 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/role")
 public class RoleController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired
 	private RoleService roleService;
 	
@@ -66,11 +70,14 @@ public class RoleController {
 				list.add(roleDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all roles. ");
 				return new ResponseEntity<Iterable<RoleDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all roles. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Roles"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -88,11 +95,13 @@ public class RoleController {
 				
 				RoleDTO roleDTO = new RoleDTO(role.get().getName());
 
-				
+				logger.info("You successfuly listed role " + roleDTO.getName());
 				return new ResponseEntity<RoleDTO>(roleDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing role with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Role not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -103,6 +112,7 @@ public class RoleController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewRole(@Valid @RequestBody RoleDTO newRole, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new role. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			roleValidator.validate(newRole, result);
@@ -110,9 +120,11 @@ public class RoleController {
 
 		Role newRoleEntity = new Role(newRole.getName());
 
-		roleService.addNewRole(newRoleEntity);
-
-		return new ResponseEntity<>(newRole, HttpStatus.OK);
+		Role savedRole = roleService.addNewRole(newRoleEntity);
+		RoleDTO roleDTO = new RoleDTO(savedRole.getName());
+		
+		logger.info("You successfuly posted new role " + roleDTO.getName());
+		return new ResponseEntity<>(roleDTO, HttpStatus.OK);
 	}
 	
 	
@@ -124,6 +136,7 @@ public class RoleController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating new role. Check input values. ");
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 				} else {
 					roleValidator.validate(newRole, result);
@@ -134,12 +147,16 @@ public class RoleController {
 				
 				role.get().setName(newRole.getName());
 
-				roleService.updateRole(id, role.get());
-
-				return new ResponseEntity<>(newRole, HttpStatus.OK);
+				Role updatedRole = roleService.updateRole(id, role.get());
+				RoleDTO roleDTO = new RoleDTO(updatedRole.getName());
+				
+				logger.info("You successfuly updated new role " + roleDTO.getName());
+				return new ResponseEntity<>(roleDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating role with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Role not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -157,10 +174,13 @@ public class RoleController {
 				RoleDTO roleDTO = new RoleDTO(role.get().getName());
 				
 				roleService.deleteRole(id);
+				logger.info("You successfuly deleted new role " + roleDTO.getName());
 				return new ResponseEntity<RoleDTO>(roleDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when deleting role with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Role not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

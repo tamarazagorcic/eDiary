@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,7 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/semestar")
 public class SemestarController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
 	private SemestarService semestarService;
@@ -66,11 +69,14 @@ public class SemestarController {
 				list.add(semestarDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all semestars. ");
 				return new ResponseEntity<Iterable<SemestarDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all semestars. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Semestars"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -87,10 +93,13 @@ public class SemestarController {
 			if (semestar.isPresent()) {
 				SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getId(),semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
 						semestar.get().getEndDate(), semestar.get().getCode(),semestar.get().isActive());
+				logger.info("You successfuly listed semestar. ");
 				return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing semestar with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -101,13 +110,16 @@ public class SemestarController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSemestar(@Valid @RequestBody SemestarDTO newSemestar, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new semestar. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			semestarValidator.validate(newSemestar, result);
 		}
 		if (semestarService.ifExists(newSemestar.getCode())) {
+			logger.error("Code for semestar is already in use. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for semestar is already in use."), HttpStatus.BAD_REQUEST);
 		}if(newSemestar.isActive()== true && semestarService.ifExistsActive(true) == true) {
+			logger.error("Active semestar is already in use. ");
 				return new ResponseEntity<RESTError>(new RESTError(1, "Active semestar is already in use."), HttpStatus.BAD_REQUEST);
 		}
 				Semestar newSemestarEntity = new Semestar(newSemestar.getName(),newSemestar.getValue(),
@@ -117,6 +129,7 @@ public class SemestarController {
 
 				SemestarDTO semestarDTO = new SemestarDTO(savedSemestar.getId(),savedSemestar.getName(), savedSemestar.getValue(), 
 						savedSemestar.getStartDate(),savedSemestar.getEndDate(),savedSemestar.getCode(),savedSemestar.isActive());
+				logger.info("You successfuly posted semestar. ");
 				return new ResponseEntity<>(semestarDTO, HttpStatus.OK);
 		
 		
@@ -131,6 +144,7 @@ public class SemestarController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating semestar. Check input values.");
 					return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 				} else {
 					semestarValidator.validate(newSemestar, result);
@@ -140,6 +154,7 @@ public class SemestarController {
 			if (semestar.isPresent()) {
 				if(!semestar.get().getCode().equals(newSemestar.getCode())) {
 					if(semestarService.ifExists(newSemestar.getCode())) {
+						logger.error("Code for semestar is already in use. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for semestar is already in use."), HttpStatus.BAD_REQUEST);
 
 					}else {
@@ -147,6 +162,7 @@ public class SemestarController {
 					}
 				}
 			if(newSemestar.isActive()== true && semestarService.ifExistsActive(true) == true) {
+				logger.error("Active semestar is already in use. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "Active semestar is already in use."), HttpStatus.BAD_REQUEST);
 			}else {
 				semestar.get().setActive(newSemestar.isActive());
@@ -161,10 +177,13 @@ public class SemestarController {
 				Semestar savedSemestar = semestarService.update(id, semestar.get());
 				SemestarDTO semestarDTO = new SemestarDTO(savedSemestar.getId(),savedSemestar.getName(), savedSemestar.getValue(), 
 						savedSemestar.getStartDate(),savedSemestar.getEndDate(),savedSemestar.getCode(),savedSemestar.isActive());
+				logger.info("You successfuly updated semestar. ");
 				return new ResponseEntity<>(semestarDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating semestar with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -181,17 +200,21 @@ public class SemestarController {
 
 				List<SchoolClass> schoolClasses = schoolClassService.findBySemestar(semestar.get());
 				if(schoolClasses.size() !=0) {
+					logger.error("You can not delete semestar when there are school classes conected to it. ");
 					return new ResponseEntity<RESTError>(new RESTError(1, "You can not delete semestar when there are school classes conected to it."), HttpStatus.BAD_REQUEST);
 
 				}else {
 					SemestarDTO semestarDTO = new SemestarDTO(semestar.get().getName(),semestar.get().getValue(),semestar.get().getStartDate(),
 						semestar.get().getEndDate(),semestar.get().getCode(),semestar.get().isActive());
 					semestarService.delete(id);
+					logger.info("You successfuly deleted semestar. ");
 					return new ResponseEntity<SemestarDTO>(semestarDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting semestar with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Semestar not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

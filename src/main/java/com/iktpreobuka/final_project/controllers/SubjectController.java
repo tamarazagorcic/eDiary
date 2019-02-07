@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,8 @@ import com.iktpreobuka.final_project.util.View;
 @RequestMapping(path = "/project/subject")
 public class SubjectController {
 
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired
 	private SubjectService subjectService;
 
@@ -66,11 +70,14 @@ public class SubjectController {
 				list.add(subjectDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all subjects. ");
 				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all subjects. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -87,11 +94,14 @@ public class SubjectController {
 				list.add(subjectDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all subjects. ");
 				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all subjects. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -108,11 +118,14 @@ public class SubjectController {
 				list.add(subjectDTO);
 			}
 			if (list.size() != 0) {
+				logger.info("You successfuly listed all subjects. ");
 				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing all subjects. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all Subject"),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -129,10 +142,13 @@ public class SubjectController {
 			if (subject.isPresent()) {
 				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getId(), subject.get().getName(),
 						subject.get().getCode());
+				logger.info("You successfuly listed subject. ");
 				return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when listing subject with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -143,15 +159,18 @@ public class SubjectController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSubject(@Valid @RequestBody SubjectDTO newSubject, BindingResult result) {
 		if (result.hasErrors()) {
+			logger.error("Something went wrong in posting new subject. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			subjectValidator.validate(newSubject, result);
 		}
 		if (subjectService.ifExists(newSubject.getCode())) {
+			logger.error("Code for subject is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for subject is present"),
 					HttpStatus.BAD_REQUEST);
 		}
 		if (subjectService.ifExistsName(newSubject.getName())) {
+			logger.error("Name for subject is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Name for subject is present"),
 					HttpStatus.BAD_REQUEST);
 		}
@@ -161,6 +180,7 @@ public class SubjectController {
 		subjectService.addNewSubject(newSubjectEntity);
 		SubjectDTO subjectDTO = new SubjectDTO(newSubjectEntity.getId(), newSubjectEntity.getName(),
 				newSubjectEntity.getCode());
+		logger.info("You successfuly posted subject. ");
 		return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 	}
 
@@ -172,6 +192,7 @@ public class SubjectController {
 
 		try {
 			if (result.hasErrors()) {
+				logger.error("Something went wrong in updating subject. Check input values.");
 				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			} else {
 				subjectValidator.validate(newSubject, result);
@@ -181,6 +202,7 @@ public class SubjectController {
 			if (subject.isPresent()) {
 				if (!subject.get().getCode().equals(newSubject.getCode())) {
 					if (subjectService.ifExists(newSubject.getCode())) {
+						logger.error("Code for subject is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Code for subject is present"),
 								HttpStatus.BAD_REQUEST);
 					} else {
@@ -189,6 +211,7 @@ public class SubjectController {
 				}
 				if (!subject.get().getName().equals(newSubject.getName())) {
 					if (subjectService.ifExistsName(newSubject.getName())) {
+						logger.error("Name for subject is present. ");
 						return new ResponseEntity<RESTError>(new RESTError(1, "Name for subject is present"),
 								HttpStatus.BAD_REQUEST);
 					} else {
@@ -200,10 +223,13 @@ public class SubjectController {
 				SubjectDTO subjectDTO = new SubjectDTO(subject.get().getId(), subject.get().getName(),
 						subject.get().getCode());
 
+				logger.info("You successfuly updated subject. ");
 				return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 			}
+			logger.error("Something went wrong when updating subject with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -220,19 +246,23 @@ public class SubjectController {
 
 				List<ProfessorSubject> professors = subjectService.findPSBySubject(subject.get());
 				if (professors.size() != 0) {
+					logger.error("You can not delete subject when there are professors conected to him/her. ");
 					return new ResponseEntity<RESTError>(
 							new RESTError(1,
-									"You can not delete subject when there are professors" + " conected to him/her."),
+									"You can not delete subject when there are professors conected to him/her."),
 							HttpStatus.BAD_REQUEST);
 
 				} else {
 					SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
 					subjectService.deleteSubject(id);
+					logger.info("You successfuly deleted subject. ");
 					return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 				}
 			}
+			logger.error("Something went wrong when deleting subject with given id. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Subject not present"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			logger.error("Something went wrong. ");
 			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
