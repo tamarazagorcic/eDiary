@@ -1,9 +1,7 @@
 package com.iktpreobuka.final_project.util;
 
-import org.dom4j.util.UserDataElement;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.iktpreobuka.final_project.entities.User;
 
 public class Encryption {
 

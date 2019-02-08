@@ -17,11 +17,9 @@ import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.repositories.ProfessorSubjectClassRepository;
-import com.iktpreobuka.final_project.repositories.ProfessorSubjectRepository;
 import com.iktpreobuka.final_project.repositories.PupilRepository;
 import com.iktpreobuka.final_project.repositories.PupilsInClassRepository;
 import com.iktpreobuka.final_project.repositories.SchoolClassRepository;
-import com.iktpreobuka.final_project.repositories.SemestarRepository;
 
 @Service
 public class SchoolClassServiceImpl implements SchoolClassService{

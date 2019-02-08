@@ -1,6 +1,5 @@
 package com.iktpreobuka.final_project.entities.dto;
 
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.util.View;

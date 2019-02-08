@@ -7,11 +7,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class PupilDTO {

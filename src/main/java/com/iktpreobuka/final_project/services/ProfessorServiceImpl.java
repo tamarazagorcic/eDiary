@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.Subject;
-import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.repositories.ProfessorRepository;
 import com.iktpreobuka.final_project.repositories.ProfessorSubjectRepository;
-import com.iktpreobuka.final_project.repositories.UserRepository;
 
 @Service
 public class ProfessorServiceImpl implements ProfessorService{
@@ -111,7 +109,7 @@ public class ProfessorServiceImpl implements ProfessorService{
 //		return professorRepo.findByUser(user.get());
 //	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public Professor findbyUser(String username){
 		
 		String str = "select p from Professor p left join fetch p.user_id u where u.username = :username";

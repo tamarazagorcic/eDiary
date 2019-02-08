@@ -14,7 +14,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.iktpreobuka.final_project.enumerations.EMarkValue;
 
 @Entity

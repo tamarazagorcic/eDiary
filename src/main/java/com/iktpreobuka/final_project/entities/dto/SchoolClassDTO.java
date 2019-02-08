@@ -2,20 +2,13 @@ package com.iktpreobuka.final_project.entities.dto;
 
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
-import com.iktpreobuka.final_project.entities.PupilsInClass;
-import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.enumerations.EGrade;
 import com.iktpreobuka.final_project.util.View;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })

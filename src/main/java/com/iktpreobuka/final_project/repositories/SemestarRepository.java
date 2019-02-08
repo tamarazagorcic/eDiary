@@ -1,6 +1,5 @@
 package com.iktpreobuka.final_project.repositories;
 
-import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 

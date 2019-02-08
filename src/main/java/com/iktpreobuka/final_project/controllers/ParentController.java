@@ -28,14 +28,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
-import com.iktpreobuka.final_project.entities.SchoolClass;
-import com.iktpreobuka.final_project.entities.Semestar;
+
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
-import com.iktpreobuka.final_project.entities.dto.PupilDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
-import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
-import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
 import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;

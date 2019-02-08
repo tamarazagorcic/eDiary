@@ -10,12 +10,10 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.iktpreobuka.final_project.entities.Activity;
-import com.iktpreobuka.final_project.entities.Mark;
+
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.repositories.PupilRepository;
-import com.iktpreobuka.final_project.repositories.PupilsInClassRepository;
 
 @Service
 public class PupilServiceImpl implements PupilService{

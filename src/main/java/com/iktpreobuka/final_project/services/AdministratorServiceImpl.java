@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Administrator;
-import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.repositories.AdministratorRepository;
 
 @Service

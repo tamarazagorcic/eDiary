@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.Subject;
-import com.iktpreobuka.final_project.entities.User;
 
 public interface ProfessorService {
 

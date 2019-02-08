@@ -41,7 +41,6 @@ import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
 import com.iktpreobuka.final_project.entities.dto.MarkDTO;
 import com.iktpreobuka.final_project.entities.dto.MarksForMenyDTO;
-import com.iktpreobuka.final_project.entities.dto.MarksForParentDTO;
 import com.iktpreobuka.final_project.entities.dto.MarksProfessorDTO;
 import com.iktpreobuka.final_project.entities.dto.ProfessorDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;

@@ -27,12 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
-import com.iktpreobuka.final_project.entities.Activity;
 import com.iktpreobuka.final_project.entities.Role;
-import com.iktpreobuka.final_project.entities.SchoolClass;
-import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.User;
-import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
 import com.iktpreobuka.final_project.entities.dto.PasswordDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
 import com.iktpreobuka.final_project.entities.dto.UserDTO;

@@ -5,9 +5,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.iktpreobuka.final_project.entities.Role;
 import com.iktpreobuka.final_project.util.View;
 
 public class UserDTO {
