@@ -111,12 +111,20 @@ public class RoleController {
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewRole(@Valid @RequestBody RoleDTO newRole, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new role. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			roleValidator.validate(newRole, result);
 		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+			
 
 		Role newRoleEntity = new Role(newRole.getName());
 

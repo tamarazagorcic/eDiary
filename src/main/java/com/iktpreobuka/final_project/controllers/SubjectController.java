@@ -50,7 +50,7 @@ public class SubjectController {
 	@Autowired
 	SubjectCustomValidator subjectValidator;
 
-	@InitBinder
+	@InitBinder("SubjectDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(subjectValidator);
 	}
@@ -158,12 +158,20 @@ public class SubjectController {
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSubject(@Valid @RequestBody SubjectDTO newSubject, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new subject. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			subjectValidator.validate(newSubject, result);
 		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		if (subjectService.ifExists(newSubject.getCode())) {
 			logger.error("Code for subject is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for subject is present"),

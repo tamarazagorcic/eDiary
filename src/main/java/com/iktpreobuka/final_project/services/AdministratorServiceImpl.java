@@ -2,10 +2,15 @@ package com.iktpreobuka.final_project.services;
 
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Administrator;
+import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.repositories.AdministratorRepository;
 
 @Service
@@ -13,6 +18,9 @@ public class AdministratorServiceImpl implements AdministratorService{
 
 	@Autowired
 	private AdministratorRepository adminRepo;
+	
+	@PersistenceContext
+	private EntityManager em;
 	
 	public Iterable<Administrator> getAllAdministrators() {
 		return adminRepo.findAll();
@@ -69,5 +77,16 @@ public class AdministratorServiceImpl implements AdministratorService{
 			}else return false;
 			
 			
+		}
+	 
+	 public Administrator findbyUser(String username){
+			
+			String str = "select a from Administrator a left join fetch a.user_id u where u.username = :username";
+			
+			Query query = em.createQuery(str);
+			query.setParameter("username", username);
+			
+			
+			return (Administrator) query.getSingleResult();
 		}
 }

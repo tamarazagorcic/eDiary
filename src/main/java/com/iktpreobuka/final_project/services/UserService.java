@@ -17,5 +17,5 @@ public interface UserService {
 	 boolean ifExists(String username);
 	 boolean ifExistsEmail(String email);
 	 List<User> findByRole(Role role);
-	 
+	 User findByUsername(String username);
 }

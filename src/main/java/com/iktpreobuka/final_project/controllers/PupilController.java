@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -30,9 +31,12 @@ import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
 import com.iktpreobuka.final_project.entities.PupilsInClass;
 import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
+import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
+import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
 import com.iktpreobuka.final_project.services.MarkService;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
@@ -66,7 +70,7 @@ public class PupilController {
 	@Autowired
 	private UserService userService;
 	
-	@InitBinder
+	@InitBinder("PupilDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(pupilValidator);
 	}
@@ -153,17 +157,63 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@Secured("ROLE_PUPIL")
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged")
+	public ResponseEntity<?> findByPupil(Authentication authentication) {
+
+		try {
+			
+			Pupil pupil = pupilService.findbyUser(authentication.getName());
+				Parent pt = pupil.getParent();
+				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
+				
+
+				List<SchoolClassDTO> list = new ArrayList<>();
+				for (SchoolClass sc : scService.findClassesByPupils(pupil.getId())) {
+
+					Semestar sm = sc.getSemestar();
+					SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),  sm.getStartDate(), 
+							sm.getEndDate(),sm.getCode(),sm.isActive());
+
+					SchoolClassDTO schoolClassDTO = new SchoolClassDTO(sc.getId(),sc.getCode(), sc.getGrade(), smDTO, sc.getName());
+
+					list.add(schoolClassDTO);
+				}
+				
+				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),
+						pupil.getJmbg(),pupil.getCode(),list,ptDTO);
+				logger.info("You successfuly listed pupil. ");
+				return new ResponseEntity<PupilDTO>(pupilDTO, HttpStatus.OK);
+			
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewPupil(@Valid @RequestBody PupilDTO newPupil, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new pupil. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			pupilValidator.validate(newPupil, result);
 		
 		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		
 		if(pupilService.ifExists(newPupil.getCode())) {
 			logger.error("Code for pupil is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for pupil is present"), HttpStatus.BAD_REQUEST);
@@ -353,6 +403,37 @@ public class PupilController {
 		}
 	}
 	
-	
+	@Secured("ROLE_ADMIN")
+	@JsonView(View.Admin.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/class/{id}")
+	public ResponseEntity<?> getAllPupilsbyclass(@PathVariable Long id) {
+		try {
+			Optional<SchoolClass> sc = scService.findById(id);
+			if (sc.isPresent()) {
+
+				List<PupilDTO> list = new ArrayList<>();
+				for (Pupil pupil : pupilService.findPupilsByClass(id)) {
+					
+					PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getCode());
+					list.add(pupilDTO);
+				}
+
+				if (list.size() != 0) {
+					logger.info("You successfuly listed school classes for pupil. ");
+
+					return new ResponseEntity<Iterable<PupilDTO>>(list, HttpStatus.OK);
+				}
+			}
+			logger.error("Something went wrong when listing pupils for school class with given id. ");
+
+			return new ResponseEntity<RESTError>(new RESTError(1, "Failed to list all pupils"),
+					HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
 	
 }

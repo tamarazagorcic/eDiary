@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -68,7 +70,7 @@ public class ProfessorController {
 	private SchoolClassService scService;
 	
 
-	@InitBinder
+	@InitBinder("ProfessorDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(professorValidator);
 	}
@@ -87,7 +89,7 @@ public class ProfessorController {
 				
 				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
 				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
-					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode());
 					listSubjectDTO.add(subjectDTO);
 				}
 				
@@ -118,7 +120,7 @@ public class ProfessorController {
 				
 				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
 				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
-					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode());
 					listSubjectDTO.add(subjectDTO);
 				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.getId(),professor.getName(),professor.getSurname(),professor.getCode(),listSubjectDTO);
@@ -148,7 +150,7 @@ public class ProfessorController {
 				
 				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
 				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
-					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode());
 					listSubjectDTO.add(subjectDTO);
 				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.getId(),professor.getName(),professor.getSurname(),professor.getCode(),listSubjectDTO);
@@ -196,14 +198,49 @@ public class ProfessorController {
 		}
 	}
 	
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged")
+	public ResponseEntity<?> findByProfessorLoged(Authentication authentication) {
+
+		try {
+			User user = userService.findByUsername(authentication.getName());
+			Professor professor = professorService.findbyUser(authentication.getName());
+			
+			
+				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					listSubjectDTO.add(subjectDTO);
+				}
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.getId(),professor.getName(),professor.getSurname(),
+						professor.getCode(),listSubjectDTO);
+				logger.info("You successfuly listed professor. ");
+				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewProfessor(@Valid @RequestBody ProfessorDTO newProfessor, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-		} else {
-			professorValidator.validate(newProfessor, result);
+		}
+//			else {
+//			professorValidator.validate(newProfessor, result);
+//		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		if(professorService.ifExists(newProfessor.getCode())) {
@@ -360,12 +397,12 @@ public class ProfessorController {
 				
 				List<SubjectDTO> list = new ArrayList<>();
 				for (Subject temp : professorService.findSubjectByProff(professor.get().getId())) {
-					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode());
 					list.add(subjectDTO);
 				}
 				
 
-				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(),professor.get().getSurname(),professor.get().getCode(),list);
+				ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getId(),professor.get().getName(),professor.get().getSurname(),professor.get().getCode(),list);
 				logger.info("You successfuly added conection between professor and subject. ");
 				return new ResponseEntity<>(professorDTO, HttpStatus.OK);
 			}

@@ -75,7 +75,7 @@ public class SchoolClassController {
 	@Autowired
 	private SubjectService subjectService;
 
-	@InitBinder
+	@InitBinder("SchoolClassDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(scValidator);
 	}
@@ -179,14 +179,22 @@ public class SchoolClassController {
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewSC(@Valid @RequestBody SchoolClassDTO newSchoolClass, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new school class. Check input values. ");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			scValidator.validate(newSchoolClass, result);
 			
 		}
-
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		
 		if(scService.ifExistsCode(newSchoolClass.getCode())) {
 			logger.error("Code for school class is already in use. ");
 

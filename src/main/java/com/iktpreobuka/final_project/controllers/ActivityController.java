@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +29,8 @@ import com.iktpreobuka.final_project.entities.Activity;
 import com.iktpreobuka.final_project.entities.Mark;
 import com.iktpreobuka.final_project.entities.dto.ActivityDTO;
 import com.iktpreobuka.final_project.services.ActivityService;
-import com.iktpreobuka.final_project.services.FileHandler;
 import com.iktpreobuka.final_project.services.MarkService;
+import com.iktpreobuka.final_project.util.ActivityCustomValidator;
 import com.iktpreobuka.final_project.util.View;
 
 @RestController
@@ -43,9 +45,17 @@ public class ActivityController {
 	
 	@Autowired
 	private MarkService markService;
+	@Autowired
+	private ActivityCustomValidator activityValidator;
 
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
+	}
+	@InitBinder("ActivityDTO")
+	protected void initBinder(final WebDataBinder binder) {
+		
+		binder.addValidators(activityValidator);
+		
 	}
 
 	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
@@ -129,14 +139,14 @@ public class ActivityController {
 	}
 
 	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
-	@JsonView(View.Private.class)
+	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByActivityId(@PathVariable Long id) {
 
 		try {
 			Optional<Activity> activity = activityService.findById(id);
 			if (activity.isPresent()) {
-				ActivityDTO activityDTO = new ActivityDTO(activity.get().getName(), activity.get().getCode());
+				ActivityDTO activityDTO = new ActivityDTO(activity.get().getId(),activity.get().getName(), activity.get().getCode());
 				logger.info("You successfuly listed activity. ");
 				return new ResponseEntity<ActivityDTO>(activityDTO, HttpStatus.OK);
 			}
@@ -153,10 +163,17 @@ public class ActivityController {
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewActivity(@Valid @RequestBody ActivityDTO newActivity, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new activity. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} 
+	} catch (Exception e) {
+		logger.error("Something went wrong. ");
+		return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+				HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 		if(activityService.ifExists(newActivity.getCode(), newActivity.getName())) {
 			logger.error("Code or name for activity is already in use. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code or name for activity is already in use."), HttpStatus.BAD_REQUEST);

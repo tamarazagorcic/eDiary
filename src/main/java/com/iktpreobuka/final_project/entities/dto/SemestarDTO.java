@@ -55,8 +55,8 @@ public class SemestarDTO {
 	@JsonView(View.Admin.class)
 	private boolean active;
 	
-	
-	@JsonIgnore
+	@JsonView(View.Admin.class)
+	//@JsonIgnore
 	@JsonBackReference("classsemestar")
 	private List<SchoolClassDTO> classes;
 

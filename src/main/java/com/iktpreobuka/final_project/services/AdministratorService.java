@@ -14,4 +14,6 @@ public interface AdministratorService {
 	Administrator deleteAdministrator(Long id);
 	Administrator findByCode(String code);
 	 boolean ifExists(String code);
+	 Administrator findbyUser(String username);
+	 
 }

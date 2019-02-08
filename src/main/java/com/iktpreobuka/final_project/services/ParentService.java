@@ -14,5 +14,7 @@ public interface ParentService {
 	 
 	 boolean ifExists(String code);
 	 Parent findByCode(String code);
+	 Parent findbyUser(String username);
+	 
 	
 }

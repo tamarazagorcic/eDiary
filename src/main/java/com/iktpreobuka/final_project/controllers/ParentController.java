@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -27,9 +28,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.final_project.controllers.util.RESTError;
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ParentDTO;
+import com.iktpreobuka.final_project.entities.dto.PupilDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
+import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
+import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
 import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
@@ -57,7 +63,7 @@ public class ParentController {
 	private PupilService pupilService;
 	
 //
-	@InitBinder
+	@InitBinder("ParentDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		
 		binder.addValidators(parentValidator);
@@ -114,17 +120,54 @@ public class ParentController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@Secured("ROLE_PARENT")
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged")
+	public ResponseEntity<?> findByParent(Authentication authentication) {
+
+		try {
+			Parent parent = parentService.findbyUser(authentication.getName());
+			
+//			List<PupilDTO> list = new ArrayList<>();
+//			for (Pupil pupil : pupilService.findPupilsByParent(parent)) {
+//
+//				
+//				PupilDTO pupilDTO = new PupilDTO(pupil.getName(), pupil.getSurname(),pupil.getJmbg(),pupil.getCode());
+//
+//				list.add(pupilDTO);
+//			}
+				ParentDTO parentDTO = new ParentDTO(parent.getId(),parent.getName(),parent.getSurname(),
+						parent.getCode());
+				logger.info("You successfuly listed parent. ");
+				return new ResponseEntity<ParentDTO>(parentDTO, HttpStatus.OK);
+			
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewParent(@Valid @RequestBody ParentDTO newParent, BindingResult result) {
-		if (result.hasErrors()) {
-			logger.error("Something went wrong in posting new parent. Check input values.");
-			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-		}else{
-		parentValidator.validate(newParent, result);
-	}
+		try{
+			if (result.hasErrors()) {
 		
+				logger.error("Something went wrong in posting new parent. Check input values.");
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			}else{
+				parentValidator.validate(newParent, result);
+			}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	
 		if(parentService.ifExists(newParent.getCode())) {
 			logger.error("Code for parent is present. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for parent is present"), HttpStatus.BAD_REQUEST);

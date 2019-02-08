@@ -44,8 +44,8 @@ public class ParentDTO {
 	@JsonView(View.Admin.class)
 	private UserDTO parentUser;
 	
-	@JsonIgnore
-	//@JsonView(View.Public.class)
+	//@JsonIgnore
+	@JsonView(View.Public.class)
 	@JsonBackReference("parentpupils")	
 	private List<PupilDTO> parent_pupils;
 
@@ -185,6 +185,19 @@ public class ParentDTO {
 		this.surname = surname;
 		this.code = code;
 		this.parentUser = parentUser;
+	}
+
+
+	public ParentDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surame must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			List<PupilDTO> parent_pupils) {
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.parent_pupils = parent_pupils;
 	}
 
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.Subject;
+import com.iktpreobuka.final_project.entities.User;
 
 public interface ProfessorService {
 
@@ -23,4 +24,5 @@ public interface ProfessorService {
 	 boolean ifExists(String code);
 	 ProfessorSubject deletePS(Long id);
 	 List<ProfessorSubject> findPSByProfessor(Professor professor);
+	 Professor findbyUser(String username);
 }

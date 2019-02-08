@@ -17,5 +17,6 @@ public interface PupilService {
 	 List<Pupil> findPupilsByParent(Parent parent);
 	 boolean ifExists(String code);
 	 boolean ifExistsJMBG(String jmbg);
+	 Pupil findbyUser(String username);
 	 
 }

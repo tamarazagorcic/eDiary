@@ -190,6 +190,16 @@ public class SchoolClassDTO {
 		this.pupilsAttendingClass = pupilsAttendingClass;
 	}
 
+	public SchoolClassDTO(Long id,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			@NotNull(message = "Grade must be provided.") EGrade grade,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 1, max = 30, message = "Name must be between {min} and {max} characters long.") String name) {
+		this.id = id;
+		this.code = code;
+		this.grade = grade;
+		this.name = name;
+	}
+
 
 	
 

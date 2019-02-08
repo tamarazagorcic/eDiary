@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -51,7 +52,7 @@ public class AdministratorController {
 	@Autowired
 	private UserService userService;
 	
-	@InitBinder
+	@InitBinder("AdministratorDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		
 		binder.addValidators(adminValidator);
@@ -90,39 +91,69 @@ public class AdministratorController {
 	}
 		@Secured("ROLE_ADMIN")
 		@JsonView(View.Admin.class)
-		@RequestMapping(method = RequestMethod.GET, value = "/{id}")
-		public ResponseEntity<?> findById(@PathVariable Long id) {
+		@RequestMapping(method = RequestMethod.GET, value = "/loged")
+		public ResponseEntity<?> findByLog(Authentication authentication) {
 
 			try {
-				Optional<Administrator> admin = adminService.findById(id);
-				if (admin.isPresent()) {
-					RoleDTO roleDTO = new RoleDTO(admin.get().getUser_id().getRole().getName());
-					UserDTO userDTO = new UserDTO(admin.get().getUser_id().getId(),admin.get().getUser_id().getEmail(),
-							admin.get().getUser_id().getUsername(),roleDTO);
-					AdministratorDTO adminDTO = new AdministratorDTO(admin.get().getId(),admin.get().getName(),
-							admin.get().getSurname(),admin.get().getCode(),userDTO);
+				Administrator admin = adminService.findbyUser(authentication.getName());
+			
+					RoleDTO roleDTO = new RoleDTO(admin.getUser_id().getRole().getName());
+					UserDTO userDTO = new UserDTO(admin.getUser_id().getId(),admin.getUser_id().getEmail(),
+							admin.getUser_id().getUsername(),roleDTO);
+					AdministratorDTO adminDTO = new AdministratorDTO(admin.getId(),admin.getName(),
+							admin.getSurname(),admin.getCode(),userDTO);
 					logger.info("You successfuly listed administrator. " + adminDTO.getName() + adminDTO.getSurname());
 					return new ResponseEntity<AdministratorDTO>(adminDTO, HttpStatus.OK);
-				}
-				logger.error("Something went wrong when listing administrator with given id. ");
-				return new ResponseEntity<RESTError>(new RESTError(1, "Admin not present"), HttpStatus.BAD_REQUEST);
+				
+				
 			} catch (Exception e) {
 				logger.error("Something went wrong. ");
 				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
+		
+//		@Secured("ROLE_ADMIN")
+//		@JsonView(View.Admin.class)
+//		@RequestMapping(method = RequestMethod.GET, value = "/{id}")
+//		public ResponseEntity<?> findById(@PathVariable Long id) {
+//
+//			try {
+//				Optional<Administrator> admin = adminService.findById(id);
+//				if (admin.isPresent()) {
+//					RoleDTO roleDTO = new RoleDTO(admin.get().getUser_id().getRole().getName());
+//					UserDTO userDTO = new UserDTO(admin.get().getUser_id().getId(),admin.get().getUser_id().getEmail(),
+//							admin.get().getUser_id().getUsername(),roleDTO);
+//					AdministratorDTO adminDTO = new AdministratorDTO(admin.get().getId(),admin.get().getName(),
+//							admin.get().getSurname(),admin.get().getCode(),userDTO);
+//					logger.info("You successfuly listed administrator. " + adminDTO.getName() + adminDTO.getSurname());
+//					return new ResponseEntity<AdministratorDTO>(adminDTO, HttpStatus.OK);
+//				}
+//				logger.error("Something went wrong when listing administrator with given id. ");
+//				return new ResponseEntity<RESTError>(new RESTError(1, "Admin not present"), HttpStatus.BAD_REQUEST);
+//			} catch (Exception e) {
+//				logger.error("Something went wrong. ");
+//				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+//						HttpStatus.INTERNAL_SERVER_ERROR);
+//			}
+//		}
 	
 		@Secured("ROLE_ADMIN")
 		@JsonView(View.Admin.class)
 		@RequestMapping(method = RequestMethod.POST)
 		public ResponseEntity<?> addNewAdmin(@Valid @RequestBody AdministratorDTO newAdmin, BindingResult result) {
+			try {
 			if (result.hasErrors()) {
 				logger.warn("Something went wrong in posting new admin. Check input values.");
 				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}else{
 			adminValidator.validate(newAdmin, result);
 		}
+			} catch (Exception e) {
+				logger.error("Something went wrong. ");
+				return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+						HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 			
 			if(adminService.ifExists(newAdmin.getCode())) {
 				logger.error("Code for admin is present. ");

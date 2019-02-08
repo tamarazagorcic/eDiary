@@ -102,4 +102,14 @@ public class PupilServiceImpl implements PupilService{
 			return true;
 		}else return false;
 	}
+	
+	public Pupil findbyUser(String username) {
+
+		String str = "select p from Pupil p left join fetch p.user_id u where u.username = :username";
+
+		Query query = em.createQuery(str);
+		query.setParameter("username", username);
+
+		return (Pupil) query.getSingleResult();
+	}
 }

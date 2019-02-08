@@ -89,4 +89,8 @@ public boolean ifExistsEmail(String email) {
 	public List<User> findByRole(Role role) {
 		return userRepo.findByRole(role); 
 	}
+	
+	public User findByUsername(String username) {
+		return userRepo.findByUsername(username);
+	}
 }

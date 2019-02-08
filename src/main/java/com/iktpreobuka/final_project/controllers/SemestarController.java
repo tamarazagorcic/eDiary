@@ -48,7 +48,7 @@ public class SemestarController {
 	@Autowired
 	private SchoolClassService schoolClassService;
 	
-	@InitBinder
+	@InitBinder("SemestarDTO")
 	protected void initBinder(final WebDataBinder binder) {
 		binder.addValidators(semestarValidator);
 	}
@@ -109,12 +109,20 @@ public class SemestarController {
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addNewSemestar(@Valid @RequestBody SemestarDTO newSemestar, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new semestar. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			semestarValidator.validate(newSemestar, result);
 		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		if (semestarService.ifExists(newSemestar.getCode())) {
 			logger.error("Code for semestar is already in use. ");
 			return new ResponseEntity<RESTError>(new RESTError(1, "Code for semestar is already in use."), HttpStatus.BAD_REQUEST);

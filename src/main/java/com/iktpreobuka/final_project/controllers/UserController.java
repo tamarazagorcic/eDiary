@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -64,7 +66,9 @@ public class UserController {
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
-	
+
+	 
+	  
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -92,14 +96,20 @@ public class UserController {
 		}
 
 	}
-	
+	 @RequestMapping(value = "/username", method = RequestMethod.GET)
+	  @ResponseBody
+	  public Object currentUserName(Authentication authentication) {
+	     return authentication.getName();
+	  }
 	
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
-	public ResponseEntity<?> findByUserId(@PathVariable Long id) {
+	public ResponseEntity<?> findByUserId(@PathVariable Long id, Authentication authentication) {
 
+		
 		try {
+			
 			Optional<User> user = userService.findById(id);
 			if (user.isPresent()) {
 				Role role = user.get().getRole();
@@ -118,16 +128,46 @@ public class UserController {
 		}
 	}
 	
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged")
+	public ResponseEntity<?> findByUserId( Authentication authentication) {
+
+		
+		try {
+			User user = userService.findByUsername(authentication.getName());
+		
+				Role role = user.getRole();
+				RoleDTO roleDTO = new RoleDTO(role.getName());
+
+				UserDTO userDTO = new UserDTO(user.getId(),user.getEmail(), user.getUsername(),roleDTO);
+				logger.info("You successfuly listed user with given id. ");
+				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
+			
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
 	public ResponseEntity<?> addNewUser(@Valid @RequestBody UserDTO newUser, BindingResult result) {
-		if (result.hasErrors()) {
+		try{
+			if (result.hasErrors()) {
+		
 			logger.error("Something went wrong in posting new user. Check input values.");
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
 			userValidator.validate(newUser, result);
 			
+		}
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		if(userService.ifExists(newUser.getUsername())) {

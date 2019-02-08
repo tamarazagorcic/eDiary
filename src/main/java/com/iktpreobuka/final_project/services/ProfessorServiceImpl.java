@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
-import com.iktpreobuka.final_project.entities.SchoolClass;
 import com.iktpreobuka.final_project.entities.Subject;
+import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.repositories.ProfessorRepository;
 import com.iktpreobuka.final_project.repositories.ProfessorSubjectRepository;
+import com.iktpreobuka.final_project.repositories.UserRepository;
 
 @Service
 public class ProfessorServiceImpl implements ProfessorService{
@@ -25,6 +26,7 @@ public class ProfessorServiceImpl implements ProfessorService{
 	
 	@Autowired
 	private ProfessorSubjectRepository psRepo;
+	
 	
 	@PersistenceContext
 	private EntityManager em;
@@ -101,7 +103,25 @@ public class ProfessorServiceImpl implements ProfessorService{
 		
 		return query.getResultList();
 	}
+	
+//	public Professor findByUser(Long id) {
+//		
+//		Optional<User> user = userRepo.findById(id);
+//		
+//		return professorRepo.findByUser(user.get());
+//	}
 
+	@SuppressWarnings("unchecked")
+	public Professor findbyUser(String username){
+		
+		String str = "select p from Professor p left join fetch p.user_id u where u.username = :username";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("username", username);
+		
+		
+		return (Professor) query.getSingleResult();
+	}
 	
 	public Optional<ProfessorSubject> findByProfessorSubject(Professor professor, Subject subject) {
 		return psRepo.findByProfessorAndSubject(professor, subject);
