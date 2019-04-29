@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,7 @@ import com.iktpreobuka.final_project.entities.dto.ParentDTO;
 import com.iktpreobuka.final_project.entities.dto.PupilDTO;
 import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
 import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
+import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.MarkService;
 import com.iktpreobuka.final_project.services.ParentService;
 import com.iktpreobuka.final_project.services.PupilService;
@@ -104,6 +106,7 @@ public class PupilController {
 //		}
 //
 //	}
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -113,9 +116,9 @@ public class PupilController {
 			for (Pupil pupil : pupilService.getAll()) {
 				Parent pt = pupil.getParent();
 				ParentDTO ptDTO = new ParentDTO(pt.getId(),pt.getName(),pt.getSurname(),pt.getCode());
-				
+				UserDTO userDTO = new UserDTO(pupil.getUser_id().getId(), pupil.getUser_id().getUsername());
 				PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getJmbg(),pupil.getCode(),
-						ptDTO);
+						ptDTO,userDTO);
 				list.add(pupilDTO);
 			}
 			if (list.size() != 0) {
@@ -132,7 +135,7 @@ public class PupilController {
 		}
 
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
@@ -157,7 +160,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_PUPIL")
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/loged")
@@ -193,7 +196,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
@@ -278,7 +281,7 @@ public class PupilController {
 	
 	
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -333,6 +336,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -366,7 +370,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/class/{idSC}")
@@ -402,7 +406,7 @@ public class PupilController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/class/{id}")

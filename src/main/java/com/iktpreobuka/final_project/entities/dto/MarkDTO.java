@@ -148,6 +148,14 @@ public class MarkDTO {
 	
 
 
+	public MarkDTO(Long id, ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value,
+			LocalDate date) {
+		this.id = id;
+		this.activity = activity;
+		this.value = value;
+		this.date = date;
+	}
+
 	public MarkDTO(ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value,
 			LocalDate date) {
 		super();
@@ -159,6 +167,17 @@ public class MarkDTO {
 	public MarkDTO(ProfessorDTO professor, SubjectDTO subject, SchoolClassDTO schoolClass, ActivityDTO activity,
 			@NotNull(message = "Value must be provided.") EMarkValue value, LocalDate date) {
 		super();
+		this.professor = professor;
+		this.subject = subject;
+		this.schoolClass = schoolClass;
+		this.activity = activity;
+		this.value = value;
+		this.date = date;
+	}
+
+	public MarkDTO(Long id, ProfessorDTO professor, SubjectDTO subject, SchoolClassDTO schoolClass,
+			ActivityDTO activity, @NotNull(message = "Value must be provided.") EMarkValue value, LocalDate date) {
+		this.id = id;
 		this.professor = professor;
 		this.subject = subject;
 		this.schoolClass = schoolClass;

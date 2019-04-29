@@ -15,6 +15,8 @@ public interface MarkRepository extends CrudRepository<Mark, Long> {
 	List<Mark> findByPupilAndProfessor(PupilsInClass pc, ProfessorSubjectClass psc);
 	List<Mark> findByProfessor(ProfessorSubjectClass psc);
 	List<Mark> findByActivity(Activity activity);
+	List<Mark> findByPupilAndProfessorAndActivity(PupilsInClass pc, ProfessorSubjectClass psc, Activity activity);
+	
 	
 	
 }

@@ -197,7 +197,36 @@ public class SchoolClassServiceImpl implements SchoolClassService{
 //		
 //	}
 	
-
+	@SuppressWarnings("unchecked")
+	public List<SchoolClass> findClassByProfessor(Long id) {
+		
+     String str = "select sc from SchoolClass sc left join fetch sc.professors_subjects psc left join fetch psc.professorSubject ps "
+     		+ "left join fetch ps.professor p where p.id = :id ";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("id", id);
+		
+		
+		
+		return query.getResultList();
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<SchoolClass> findClassByProfessorAndSubject(Long idP, Long idS) {
+		
+     String str = "select sc from SchoolClass sc left join fetch sc.professors_subjects psc left join fetch psc.professorSubject ps "
+     		+ "left join fetch ps.professor p left join fetch ps.subject s where p.id = :idP and s.id = :idS";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("idP", idP);
+		query.setParameter("idS", idS);
+		
+		
+		
+		return query.getResultList();
+		
+	}
 	
 	public SchoolClass findClassByPupilandSemestar(Long id, Semestar semestar) {
 		

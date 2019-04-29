@@ -10,9 +10,9 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import com.iktpreobuka.final_project.entities.Parent;
 import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.repositories.PupilRepository;
 
 @Service
@@ -80,6 +80,19 @@ public class PupilServiceImpl implements PupilService{
 		
 		return query.getResultList();
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Subject> findByPupil(Long id){
+		
+		String str = "select s from Subject s left join fetch s.professors ps left join fetch ps.profesor_subject_class psc left join"
+				+ "fetch psc.schoolClass sc left join fetch sc.pupils pc left join fetch pc.pupil p where p.id = :id";
+		
+		Query query = em.createQuery(str);
+		query.setParameter("id", id);
+		
+		
+		return query.getResultList();
 	}
 	
 	public List<Pupil> findPupilsByParent(Parent parent){

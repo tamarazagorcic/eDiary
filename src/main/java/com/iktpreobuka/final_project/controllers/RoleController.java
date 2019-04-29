@@ -16,6 +16,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +53,7 @@ public class RoleController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET)
@@ -79,7 +80,7 @@ public class RoleController {
 		}
 
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
@@ -102,7 +103,7 @@ public class RoleController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
@@ -131,7 +132,7 @@ public class RoleController {
 		return new ResponseEntity<>(roleDTO, HttpStatus.OK);
 	}
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -165,7 +166,7 @@ public class RoleController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")

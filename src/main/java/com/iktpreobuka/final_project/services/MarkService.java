@@ -19,6 +19,7 @@ public interface MarkService {
 	 List<Mark> findByPupilAndSubject(PupilsInClass pc, ProfessorSubjectClass psc);
 	 List<Mark> findByClassAndSubject( ProfessorSubjectClass psc);
 	 List<Mark> findMarksByActivity(Activity activity);
+	 List<Mark> findMarksByPupilAndProfessorAndActivity(PupilsInClass pc, ProfessorSubjectClass psc,Activity activity);
 	 
 	 
 }

@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,7 +65,7 @@ public class UserController {
 	}
 
 	 
-	  
+	@CrossOrigin 
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -75,7 +76,7 @@ public class UserController {
 				
 				Role role = user.getRole();
 				RoleDTO roleDTO = new RoleDTO(role.getName());
-				UserDTO userDTO = new UserDTO(user.getEmail(), user.getPassword(), user.getUsername(),roleDTO);
+				UserDTO userDTO = new UserDTO(user.getId(),user.getEmail(), user.getUsername(),roleDTO);
 				list.add(userDTO);
 			}
 			if (list.size() != 0) {
@@ -92,12 +93,13 @@ public class UserController {
 		}
 
 	}
+	@CrossOrigin
 	 @RequestMapping(value = "/username", method = RequestMethod.GET)
 	  @ResponseBody
 	  public Object currentUserName(Authentication authentication) {
 	     return authentication.getName();
 	  }
-	
+	 @CrossOrigin 
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
@@ -111,7 +113,7 @@ public class UserController {
 				Role role = user.get().getRole();
 				RoleDTO roleDTO = new RoleDTO(role.getName());
 
-				UserDTO userDTO = new UserDTO(user.get().getEmail(), user.get().getPassword(), user.get().getUsername(),roleDTO);
+				UserDTO userDTO = new UserDTO(user.get().getId(),user.get().getEmail(), user.get().getPassword(), user.get().getPassword(),user.get().getUsername(),roleDTO);
 				logger.info("You successfuly listed user with given id. ");
 				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 			}
@@ -124,6 +126,7 @@ public class UserController {
 		}
 	}
 	
+	 @CrossOrigin
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/loged")
 	public ResponseEntity<?> findByUserId( Authentication authentication) {
@@ -146,7 +149,7 @@ public class UserController {
 		}
 	}
 	
-	
+	@CrossOrigin 
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
@@ -205,10 +208,10 @@ public class UserController {
 		return new ResponseEntity<>(newUser, HttpStatus.OK);
 
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}", consumes="application/json")
 	public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO newUser,@PathVariable Long id, 
 			BindingResult result) {
 
@@ -257,6 +260,7 @@ public class UserController {
 		}
 	}
 	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "passwordChange/{id}")
@@ -296,7 +300,7 @@ public class UserController {
 	}
 	
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -321,7 +325,7 @@ public class UserController {
 		}
 	}
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idUser}/role/{idRole}")

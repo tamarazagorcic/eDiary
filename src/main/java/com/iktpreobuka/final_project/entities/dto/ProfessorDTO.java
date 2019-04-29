@@ -168,6 +168,19 @@ public class ProfessorDTO {
 		this.surname = surname;
 		this.code = code;
 	}
+
+	public ProfessorDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Surname must be provided.") @Pattern(regexp = "^\\S*$", message = "Surname must not contain white space.") @Size(min = 2, max = 30, message = "Surname must be between {min} and {max} characters long.") String surname,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			List<SubjectDTO> subjects, UserDTO professorUser) {
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.code = code;
+		this.subjects = subjects;
+		this.professorUser = professorUser;
+	}
 	
 	
 	

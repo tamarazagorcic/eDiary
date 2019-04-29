@@ -16,6 +16,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,8 +58,8 @@ public class ActivityController {
 		binder.addValidators(activityValidator);
 		
 	}
-
-	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
+	@CrossOrigin
+	//@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/public")
 	public ResponseEntity<?> getAllActivitiesPublic() {
@@ -89,8 +90,9 @@ public class ActivityController {
 		
 
 	}
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
-	@JsonView(View.Private.class)
+	//@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
 	public ResponseEntity<?> getAllActivitiesPrivate() {
 		try {
@@ -113,6 +115,7 @@ public class ActivityController {
 		}
 
 	}
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -138,7 +141,8 @@ public class ActivityController {
 
 	}
 
-	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+	@CrossOrigin
+	//@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByActivityId(@PathVariable Long id) {
@@ -159,6 +163,7 @@ public class ActivityController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
@@ -192,6 +197,7 @@ public class ActivityController {
 		
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -238,6 +244,7 @@ public class ActivityController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")

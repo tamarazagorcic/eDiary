@@ -99,6 +99,12 @@ public class UserDTO {
 		super();
 	}
 
+	public UserDTO(Long id,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username) {
+		this.id = id;
+		this.username = username;
+	}
+
 	public UserDTO(
 			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
 			@NotBlank(message = "Password must be provided.") @Pattern(regexp = "^\\S*$", message = "Password must not contain white space.") @Size(min = 5, max = 10, message = "Password must be between {min} and {max} characters long.") String password,
@@ -134,6 +140,32 @@ public class UserDTO {
 			RoleDTO role) {
 		this.id = id;
 		this.email = email;
+		this.username = username;
+		this.role = role;
+	}
+
+	public UserDTO(Long id,
+			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
+			@NotBlank(message = "Password must be provided.") @Pattern(regexp = "^\\S*$", message = "Password must not contain white space.") @Size(min = 5, max = 10, message = "Password must be between {min} and {max} characters long.") String password,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
+			RoleDTO role) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.username = username;
+		this.role = role;
+	}
+
+	public UserDTO(Long id,
+			@NotNull(message = "Email must be provided.") @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Email is not valid.") String email,
+			@NotBlank(message = "Password must be provided.") @Pattern(regexp = "^\\S*$", message = "Password must not contain white space.") @Size(min = 5, max = 10, message = "Password must be between {min} and {max} characters long.") String password,
+			String confirmPassword,
+			@NotBlank(message = "Username must be provided.") @Size(min = 5, max = 15, message = "Username must be between {min} and {max} characters long.") @Pattern(regexp = "^\\S*$", message = "Username must not contain white space.") String username,
+			RoleDTO role) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		this.confirmPassword = confirmPassword;
 		this.username = username;
 		this.role = role;
 	}

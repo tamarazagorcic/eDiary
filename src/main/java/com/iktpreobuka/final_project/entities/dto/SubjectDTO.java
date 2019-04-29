@@ -31,6 +31,9 @@ public class SubjectDTO {
 	@JsonIgnore
 	private List<ProfessorDTO> professors;
 	
+	@JsonView(View.Private.class)
+	private List<SchoolClassDTO> schoolClasses;
+	
 	
 	public Long getId() {
 		return id;
@@ -56,6 +59,22 @@ public class SubjectDTO {
 		this.code = code;
 	}
 
+	public List<ProfessorDTO> getProfessors() {
+		return professors;
+	}
+
+	public void setProfessors(List<ProfessorDTO> professors) {
+		this.professors = professors;
+	}
+
+	public List<SchoolClassDTO> getSchoolClasses() {
+		return schoolClasses;
+	}
+
+	public void setSchoolClasses(List<SchoolClassDTO> schoolClasses) {
+		this.schoolClasses = schoolClasses;
+	}
+
 	public SubjectDTO(
 			@NotNull(message = "Name must be provided.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
 			@NotNull(message = "Code must be provided.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code) {
@@ -74,6 +93,16 @@ public class SubjectDTO {
 		this.id = id;
 		this.name = name;
 		this.code = code;
+	}
+
+	public SubjectDTO(Long id,
+			@NotBlank(message = "Name must be provided.") @Pattern(regexp = "^\\S*$", message = "Name must not contain white space.") @Size(min = 2, max = 30, message = "Name must be between {min} and {max} characters long.") String name,
+			@NotBlank(message = "Code must be provided.") @Pattern(regexp = "^\\S*$", message = "Code must not contain white space.") @Size(min = 1, max = 30, message = "Code must be between {min} and {max} characters long.") String code,
+			List<SchoolClassDTO> schoolClasses) {
+		this.id = id;
+		this.name = name;
+		this.code = code;
+		this.schoolClasses = schoolClasses;
 	}
 	
 	

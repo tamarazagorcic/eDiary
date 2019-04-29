@@ -32,7 +32,6 @@ public class Professor extends Person{
 	private User user_id;
 	
 	
-
 	public User getUser_id() {
 		return user_id;
 	}

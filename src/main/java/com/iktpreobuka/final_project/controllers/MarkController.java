@@ -18,11 +18,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -104,7 +106,8 @@ public class MarkController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
-	@Secured("ROLE_ADMIN")
+	@CrossOrigin
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findByMarkId(@PathVariable Long id) {
@@ -143,6 +146,7 @@ public class MarkController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET)
@@ -186,10 +190,11 @@ public class MarkController {
 
 	}
 
+	@CrossOrigin
 	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> addNewMark(@Valid @RequestBody MarkDTO newMark, BindingResult result) {
+	public ResponseEntity<?> addNewMark(@Valid  @RequestBody MarkDTO newMark, BindingResult result) {
 		try{
 			if (result.hasErrors()) {
 		
@@ -204,11 +209,12 @@ public class MarkController {
 		}
 
 		try {
-		Optional<Professor> professor = professorService.findById(newMark.getProfessor().getId());
+			Professor professor = professorService.findbyUser(newMark.getProfessor().getProfessorUser().getUsername());
+		//Optional<Professor> professor = professorService.findById(newMark.getProfessor().getId());
 		Optional<Subject> subject = subjectService.findById(newMark.getSubject().getId());
 		Optional<SchoolClass> sc = scService.findById(newMark.getSchoolClass().getId());
 		Optional<Pupil> pupil = pupilService.findById(newMark.getPupil().getId());
-		Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor.get(),
+		Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor,
 				subject.get());
 		Optional<ProfessorSubjectClass> professorSubjectClass = scService
 				.findByProfessorSubjectClass(professorSubject.get(), sc.get());
@@ -216,16 +222,22 @@ public class MarkController {
 		Activity activity = activityService.findActivityByName(newMark.getActivity().getName());
 		LocalDate date = LocalDate.now();
 
-		if (professor.isPresent() && subject.isPresent() && sc.isPresent() && pupil.isPresent()
+		if (subject.isPresent() && sc.isPresent() && pupil.isPresent()
 				&& professorSubject.isPresent() && professorSubjectClass.isPresent() && pupilsInClass.isPresent()) {
+			Activity activityFinal = activityService.findActivityByName("final");
+			if((markService.findMarksByPupilAndProfessorAndActivity(pupilsInClass.get(), professorSubjectClass.get(), activityFinal)).size() !=0) {
+				logger.error("You can not add marks when there is final mark that is set. ");
+				return new ResponseEntity<RESTError>(new RESTError(1, "You can not add marks when there is final mark that is set."), HttpStatus.BAD_REQUEST);
+
+			}
 
 			Mark newMarkEntity = new Mark(pupilsInClass.get(), professorSubjectClass.get(), newMark.getValue(), date,
 					activity);
 			markService.addNewMark(newMarkEntity);
 			ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
 
-			ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(), professor.get().getSurname(),
-					professor.get().getCode());
+			ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(), professor.getSurname(),
+					professor.getCode());
 
 			SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
 
@@ -240,7 +252,7 @@ public class MarkController {
 			object.setSubject("Obavestenje o oceni Vaseg deteta " + pupil.get().getName() + " " + pupil.get().getSurname());
 			String text = "Vase dete " + pupil.get().getName() + " " + pupil.get().getSurname() + " je dobilo ocenu "
 					+ newMark.getValue() + " iz predmeta " + subject.get().getName() + " ocenio profesor "
-					+ professor.get().getName() + " " + professor.get().getSurname()
+					+ professor.getName() + " " + professor.getSurname()
 					+ " . Za dalje informacije mozete kontaktirati mail skole .";
 
 			object.setText(text);
@@ -265,7 +277,7 @@ public class MarkController {
 		}
 		
 	}
-
+	@CrossOrigin
 	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -281,6 +293,14 @@ public class MarkController {
 
 			Optional<Mark> mark = markService.findById(id);
 			if (mark.isPresent()) {
+				ProfessorSubjectClass professorSubjectClass= mark.get().getProfessor();
+				PupilsInClass pupilInClass = mark.get().getPupil(); 
+				Activity activityFinal = activityService.findActivityByName("final");
+				if((markService.findMarksByPupilAndProfessorAndActivity(pupilInClass, professorSubjectClass, activityFinal)).size() !=0) {
+					logger.error("You can not change marks when there is final mark that is set. ");
+					return new ResponseEntity<RESTError>(new RESTError(1, "You can not change marks when there is final mark that is set."), HttpStatus.BAD_REQUEST);
+
+				}
 				mark.get().setValue(newMark.getValue());
 				Activity activity = activityService.findActivityByName(newMark.getActivity().getName());
 				mark.get().setActivity(activity);
@@ -316,7 +336,7 @@ public class MarkController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -357,8 +377,8 @@ public class MarkController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-	@Secured("ROLE_ADMIN")
+	@CrossOrigin
+	@Secured("ROLE_PUPIL")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
 	public ResponseEntity<?> findMarksByPupilId(@PathVariable Long id) {
@@ -413,13 +433,14 @@ public class MarkController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_PUPIL")
-	@JsonView(View.Public.class)
-	@RequestMapping(method = RequestMethod.GET, value = "/pupil/loged")
-	public ResponseEntity<?> findMarksByPupilLoged(Authentication authentication) {
+	//@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/pupil/loged/{username}")
+	public ResponseEntity<?> findMarksByPupilLoged(@PathVariable String username) {
 
 		try {
-			Pupil pupil = pupilService.findbyUser(authentication.getName());
+			Pupil pupil = pupilService.findbyUser(username);
 			Semestar semestar = semestarService.findIfActive(true);
 			SchoolClass sc = scService.findClassByPupilandSemestar(pupil.getId(), semestar);
 
@@ -430,6 +451,7 @@ public class MarkController {
 				List<MarkDTO> marks = new ArrayList<>();
 				for (Mark mark : markService.findByPupilInClass(pc.get())) {
 
+				
 					Activity activity = mark.getActivity();
 					ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
 
@@ -443,7 +465,63 @@ public class MarkController {
 
 					SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
 
-					MarkDTO markDTO = new MarkDTO(professorDTO,subjectDTO, scDTO, acDTO, mark.getValue(),
+					MarkDTO markDTO = new MarkDTO(mark.getId(),professorDTO,subjectDTO, scDTO, acDTO, mark.getValue(),
+							mark.getDate());
+
+					marks.add(markDTO);
+				}
+
+				if (marks.size() != 0) {
+
+
+					PupilDTO pupilDTO = new PupilDTO(pupil.getName(), pupil.getSurname(),
+							pupil.getCode());
+					PupilMarkDTO pupilsMarks = new PupilMarkDTO(pupilDTO,marks);
+					logger.info("You successfuly listed all marks for pupil. " + pupilDTO.getName() + pupilDTO.getSurname() );
+					return new ResponseEntity<PupilMarkDTO>(pupilsMarks, HttpStatus.OK);
+				}
+			}
+			logger.error("Something went wrong while listing all marks and pupil. ");
+			return new ResponseEntity<RESTError>(new RESTError(1, "Marks not present"), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	@CrossOrigin
+	@Secured("ROLE_PUPIL")
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/pupil/logedd")
+	public ResponseEntity<?> findMarksByPupilLogedd(Authentication authentication) {
+
+		try {
+			Pupil pupil = pupilService.findbyUser(authentication.getName());
+			Semestar semestar = semestarService.findIfActive(true);
+			SchoolClass sc = scService.findClassByPupilandSemestar(pupil.getId(), semestar);
+
+			Optional<PupilsInClass> pc = scService.findPupilsInClass(sc, pupil);
+			if (pc.isPresent()) {
+
+				
+				List<MarkDTO> marks = new ArrayList<>();
+				for (Mark mark : markService.findByPupilInClass(pc.get())) {
+
+				
+					Activity activity = mark.getActivity();
+					ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
+
+					Professor professor = mark.getProfessor().getProfessorSubject().getProfessor();
+					ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(), professor.getSurname(),
+							professor.getCode());
+
+					Subject subject = mark.getProfessor().getProfessorSubject().getSubject();
+					SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
+
+
+					SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
+
+					MarkDTO markDTO = new MarkDTO(mark.getId(),professorDTO,subjectDTO, scDTO, acDTO, mark.getValue(),
 							mark.getDate());
 
 					marks.add(markDTO);
@@ -468,6 +546,7 @@ public class MarkController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/professor/{idPr}/subject/{idS}/pupil/{idPu}")
@@ -530,6 +609,7 @@ public class MarkController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/subject/{idS}/pupil/{idPu}")
@@ -592,39 +672,41 @@ public class MarkController {
 		}
 	}
 	
-	@Secured("ROLE_ADMIN")
+	@CrossOrigin
+	@Secured({"ROLE_ADMIN","ROLE_PROFESSOR"})
 	@JsonView(View.Private.class)
-	@RequestMapping(method = RequestMethod.GET, value = "/professor/{idPr}/subject/{idS}/class/{idSc}")
-	public ResponseEntity<?> findMarksByProfessorAndClass(@PathVariable Long idPr, @PathVariable Long idS,
+	@RequestMapping(method = RequestMethod.GET, value = "/professor/{username}/subject/{idS}/class/{idSc}")
+	public ResponseEntity<?> findMarksByProfessorAndClass(@PathVariable String username, @PathVariable Long idS,
 			@PathVariable Long idSc) {
 
 		try {
 			Optional<Subject> subject = subjectService.findById(idS);
-			Optional<Professor> professor = professorService.findById(idPr);
+			Professor professor = professorService.findbyUser(username);
+			//Optional<Professor> professor = professorService.findById(idPr);
 			Optional<SchoolClass> sc = scService.findById(idSc);
 
-			Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor.get(),
+			Optional<ProfessorSubject> professorSubject = professorService.findByProfessorSubject(professor,
 					subject.get());
 			Optional<ProfessorSubjectClass> professorSubjectClass = scService
 					.findByProfessorSubjectClass(professorSubject.get(), sc.get());
 
-			ProfessorDTO professorDTO = new ProfessorDTO(professor.get().getName(), professor.get().getSurname(),
-					professor.get().getCode());
-			SubjectDTO subjectDTO = new SubjectDTO(subject.get().getName(), subject.get().getCode());
-			SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getCode(), sc.get().getGrade(), sc.get().getName());
+			ProfessorDTO professorDTO = new ProfessorDTO(professor.getId(),professor.getName(), professor.getSurname(),
+					professor.getCode());
+			SubjectDTO subjectDTO = new SubjectDTO(subject.get().getId(),subject.get().getName(), subject.get().getCode());
+			SchoolClassDTO scDTO = new SchoolClassDTO(sc.get().getId(),sc.get().getCode(), sc.get().getGrade(), sc.get().getName());
 
 			if (professorSubjectClass.isPresent()) {
 
 				List<PupilMarkDTO> pupils = new ArrayList<>();
 				for (Pupil pupil : pupilService.findPupilsByClass(idSc)) {
 					Optional<PupilsInClass> pc = scService.findPupilsInClass(sc.get(), pupil);
-					PupilDTO pupilDTO = new PupilDTO(pupil.getName(), pupil.getSurname(), pupil.getCode());
+					PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(), pupil.getSurname(), pupil.getCode());
 					List<MarkDTO> marks = new ArrayList<>();
 					for (Mark mark : markService.findByPupilAndSubject(pc.get(), professorSubjectClass.get())) {
 
 						Activity activity = mark.getActivity();
 						ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
-						MarkDTO markDTO = new MarkDTO(acDTO, mark.getValue(), mark.getDate());
+						MarkDTO markDTO = new MarkDTO(mark.getId(),acDTO, mark.getValue(), mark.getDate());
 						marks.add(markDTO);
 					}
 
@@ -650,7 +732,7 @@ public class MarkController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/subject/{idS}/class/{idSc}")
@@ -710,6 +792,7 @@ public class MarkController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/parent/{id}")
@@ -774,7 +857,7 @@ public class MarkController {
 		}
 	}
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_PARENT")
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/parent/loged")
@@ -837,7 +920,68 @@ public class MarkController {
 		}
 	}
 	
-	
+	@CrossOrigin
+	@Secured("ROLE_PARENT")
+	@JsonView(View.Public.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/parent/loged/{username}")
+	public ResponseEntity<?> findMarksByParentLogedd(@PathVariable String username) {
+
+		try {
+			Parent parent = parentService.findbyUser(username);
+			
+
+				List<PupilMarkDTO> pupilsMarks = new ArrayList<>();
+				
+				for (Pupil pupils : parent.getParent_pupils()) {
+					try {
+						Optional<Pupil> pupil = pupilService.findById(pupils.getId());
+						Semestar semestar = semestarService.findIfActive(true);
+						SchoolClass sc = scService.findClassByPupilandSemestar(pupils.getId(), semestar);
+						
+						
+						Optional<PupilsInClass> pc = scService.findPupilsInClass(sc, pupil.get());
+						PupilDTO pupilDTO = new PupilDTO(pupil.get().getId(),pupil.get().getName(), pupil.get().getSurname(),
+								pupil.get().getCode());
+						
+						if (pupil.isPresent() && pc.isPresent()) {
+							List<MarkDTO> marks = new ArrayList<>();
+							
+							for (Mark mark : markService.findByPupilInClass(pc.get())) {
+
+								Activity activity = mark.getActivity();
+								ActivityDTO acDTO = new ActivityDTO(activity.getName(), activity.getCode());
+
+								Professor professor = mark.getProfessor().getProfessorSubject().getProfessor();
+								ProfessorDTO professorDTO = new ProfessorDTO(professor.getName(),
+										professor.getSurname(), professor.getCode());
+
+								Subject subject = mark.getProfessor().getProfessorSubject().getSubject();
+								SubjectDTO subjectDTO = new SubjectDTO(subject.getName(), subject.getCode());
+								
+								SchoolClassDTO scDTO = new SchoolClassDTO(sc.getCode(), sc.getGrade(), sc.getName());
+								
+								MarkDTO markDTO = new MarkDTO(mark.getId(),professorDTO, subjectDTO, scDTO, acDTO, mark.getValue(),
+										mark.getDate());
+								marks.add(markDTO);
+							}
+							PupilMarkDTO pupilMarkDTO = new PupilMarkDTO(pupilDTO, marks);
+							pupilsMarks.add(pupilMarkDTO);
+						}
+						}catch (Exception e) {
+							logger.error("Something went wrong. ");
+						return new ResponseEntity<RESTError>(new RESTError(2, "Exception  :" + e.getMessage()),
+								HttpStatus.INTERNAL_SERVER_ERROR);
+					}	
+				}
+				logger.info("You successfuly listed marks for pupil. ");
+				return new ResponseEntity<Iterable<PupilMarkDTO>>(pupilsMarks, HttpStatus.OK);
+			
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	
 	

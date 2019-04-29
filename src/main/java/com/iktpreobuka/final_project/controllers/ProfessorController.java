@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,15 +31,22 @@ import com.iktpreobuka.final_project.entities.Mark;
 import com.iktpreobuka.final_project.entities.Professor;
 import com.iktpreobuka.final_project.entities.ProfessorSubject;
 import com.iktpreobuka.final_project.entities.ProfessorSubjectClass;
+import com.iktpreobuka.final_project.entities.Pupil;
+import com.iktpreobuka.final_project.entities.Role;
 import com.iktpreobuka.final_project.entities.SchoolClass;
+import com.iktpreobuka.final_project.entities.Semestar;
 import com.iktpreobuka.final_project.entities.Subject;
 import com.iktpreobuka.final_project.entities.User;
 import com.iktpreobuka.final_project.entities.dto.ProfessorDTO;
+import com.iktpreobuka.final_project.entities.dto.PupilDTO;
 import com.iktpreobuka.final_project.entities.dto.RoleDTO;
+import com.iktpreobuka.final_project.entities.dto.SchoolClassDTO;
+import com.iktpreobuka.final_project.entities.dto.SemestarDTO;
 import com.iktpreobuka.final_project.entities.dto.SubjectDTO;
 import com.iktpreobuka.final_project.entities.dto.UserDTO;
 import com.iktpreobuka.final_project.services.MarkService;
 import com.iktpreobuka.final_project.services.ProfessorService;
+import com.iktpreobuka.final_project.services.PupilService;
 import com.iktpreobuka.final_project.services.SchoolClassService;
 import com.iktpreobuka.final_project.services.SubjectService;
 import com.iktpreobuka.final_project.services.UserService;
@@ -60,6 +68,9 @@ public class ProfessorController {
 	private UserService userService;
 	
 	@Autowired
+	private PupilService pupilService;
+	
+	@Autowired
 	private MarkService markService;
 
 	@Autowired
@@ -77,7 +88,7 @@ public class ProfessorController {
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
-	
+	@CrossOrigin
 	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/public")
@@ -109,6 +120,7 @@ public class ProfessorController {
 		}
 
 	}
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
@@ -139,6 +151,7 @@ public class ProfessorController {
 		}
 
 	}
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -169,7 +182,7 @@ public class ProfessorController {
 		}
 
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
@@ -196,24 +209,29 @@ public class ProfessorController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/loged")
 	public ResponseEntity<?> findByProfessorLoged(Authentication authentication) {
 
 		try {
-		//	User user = userService.findByUsername(authentication.getName());
+			User user = userService.findByUsername(authentication.getName());
+			
+			Role role = user.getRole();
+			RoleDTO roleDTO = new RoleDTO(role.getName());
+
+			UserDTO userDTO = new UserDTO(user.getId(),user.getEmail(), user.getUsername(),roleDTO);
 			Professor professor = professorService.findbyUser(authentication.getName());
 			
 			
 				List<SubjectDTO> listSubjectDTO = new ArrayList<>();
 				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
-					SubjectDTO subjectDTO = new SubjectDTO(temp.getName(),temp.getCode());
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode());
 					listSubjectDTO.add(subjectDTO);
 				}
 				ProfessorDTO professorDTO = new ProfessorDTO(professor.getId(),professor.getName(),professor.getSurname(),
-						professor.getCode(),listSubjectDTO);
+						professor.getCode(),listSubjectDTO,userDTO);
 				logger.info("You successfuly listed professor. ");
 				return new ResponseEntity<ProfessorDTO>(professorDTO, HttpStatus.OK);
 
@@ -224,6 +242,153 @@ public class ProfessorController {
 		}
 	}
 	
+	@CrossOrigin
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/classesBySubject")
+	public ResponseEntity<?> findClassesByProfessorLogedAndSubject(Authentication authentication) {
+
+		try {
+			
+			Professor professor = professorService.findbyUser(authentication.getName());
+			
+				List<SubjectDTO> list = new ArrayList<>();
+				List<SchoolClassDTO> listscDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					
+					for (SchoolClass sc : scService.findClassByProfessorAndSubject(professor.getId(), temp.getId())) {
+						Semestar sm = sc.getSemestar();
+						SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(),
+								sm.getCode(),sm.isActive());
+						List<PupilDTO> pupilsAttendingClass = new ArrayList<>();
+						for (Pupil pupil : pupilService.findPupilsByClass(sc.getId())) {
+							
+							PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getCode());
+							pupilsAttendingClass.add(pupilDTO);
+						}
+
+						
+						SchoolClassDTO scDTO = new SchoolClassDTO(sc.getId(),sc.getCode(),sc.getGrade(),smDTO,sc.getName(),pupilsAttendingClass);
+						listscDTO.add(scDTO);
+					}
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode(),listscDTO);
+					list.add(subjectDTO);
+				}
+				
+				logger.info("You successfuly listed classes for professor and subject. ");
+				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@CrossOrigin
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/classesBySubject/{username}")
+	public ResponseEntity<?> findClassesByProfessorAndSubject(@PathVariable String username) {
+
+		try {
+			
+			Professor professor = professorService.findbyUser(username);
+			
+				List<SubjectDTO> list = new ArrayList<>();
+				List<SchoolClassDTO> listscDTO = new ArrayList<>();
+				for (Subject temp : professorService.findSubjectByProff(professor.getId())) {
+					
+					for (SchoolClass sc : scService.findClassByProfessorAndSubject(professor.getId(), temp.getId())) {
+						Semestar sm = sc.getSemestar();
+						SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(),
+								sm.getCode(),sm.isActive());
+						List<PupilDTO> pupilsAttendingClass = new ArrayList<>();
+						for (Pupil pupil : pupilService.findPupilsByClass(sc.getId())) {
+							
+							PupilDTO pupilDTO = new PupilDTO(pupil.getId(),pupil.getName(),pupil.getSurname(),pupil.getCode());
+							pupilsAttendingClass.add(pupilDTO);
+						}
+
+						
+						SchoolClassDTO scDTO = new SchoolClassDTO(sc.getId(),sc.getCode(),sc.getGrade(),smDTO,sc.getName(),pupilsAttendingClass);
+						listscDTO.add(scDTO);
+					}
+					SubjectDTO subjectDTO = new SubjectDTO(temp.getId(),temp.getName(),temp.getCode(),listscDTO);
+					list.add(subjectDTO);
+				}
+				
+				logger.info("You successfuly listed classes for professor and subject. ");
+				return new ResponseEntity<Iterable<SubjectDTO>>(list, HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	@CrossOrigin
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged/classes/{username}")
+	public ResponseEntity<?> findClassesByProfessor(@PathVariable String username) {
+
+		try {
+			
+			Professor professor = professorService.findbyUser(username);
+			
+			
+				List<SchoolClassDTO> listscDTO = new ArrayList<>();
+				for (SchoolClass temp : scService.findClassByProfessor(professor.getId())) {
+					Semestar sm = temp.getSemestar();
+					SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(),
+							sm.getCode(),sm.isActive());
+
+					SchoolClassDTO scDTO = new SchoolClassDTO(temp.getId(),temp.getCode(),temp.getGrade(),smDTO,temp.getName());
+					listscDTO.add(scDTO);
+				}
+				
+				logger.info("You successfuly listed school classes by professor. ");
+				return new ResponseEntity<Iterable<SchoolClassDTO>>(listscDTO, HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@CrossOrigin
+	@Secured("ROLE_PROFESSOR")
+	@JsonView(View.Private.class)
+	@RequestMapping(method = RequestMethod.GET, value = "/loged/classes")
+	public ResponseEntity<?> findClassesByProfessorLoged(Authentication authentication) {
+
+		try {
+			
+			Professor professor = professorService.findbyUser(authentication.getName());
+			
+			
+				List<SchoolClassDTO> listscDTO = new ArrayList<>();
+				for (SchoolClass temp : scService.findClassByProfessor(professor.getId())) {
+					Semestar sm = temp.getSemestar();
+					SemestarDTO smDTO = new SemestarDTO(sm.getId(),sm.getName(), sm.getValue(),sm.getStartDate(),sm.getEndDate(),
+							sm.getCode(),sm.isActive());
+
+					SchoolClassDTO scDTO = new SchoolClassDTO(temp.getId(),temp.getCode(),temp.getGrade(),smDTO,temp.getName());
+					listscDTO.add(scDTO);
+				}
+				
+				logger.info("You successfuly listed school classes by professor. ");
+				return new ResponseEntity<Iterable<SchoolClassDTO>>(listscDTO, HttpStatus.OK);
+
+		} catch (Exception e) {
+			logger.error("Something went wrong. ");
+			return new ResponseEntity<RESTError>(new RESTError(2, "Exception occured :" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST)
@@ -270,7 +435,7 @@ public class ProfessorController {
 		return new ResponseEntity<>(professorDTO, HttpStatus.OK);
 	}
 	
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -316,6 +481,7 @@ public class ProfessorController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -346,7 +512,7 @@ public class ProfessorController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/subject/{idS}")
@@ -379,7 +545,7 @@ public class ProfessorController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}")
@@ -413,7 +579,7 @@ public class ProfessorController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/subject/{idS}/class/{idSC}")

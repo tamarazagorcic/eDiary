@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileHandlerImpl implements FileHandler{
 
-	static final String UPLOAD_FOLDER = "C:\\temp\\";
+	static final String UPLOAD_FOLDER = "C:\\Users\\Tamara\\Documents\\workspace-sts-3.9.6.RELEASE\\final_project\\logs";
 
 	@Override
 	public boolean singleFileUpload(MultipartFile file) throws IOException {
@@ -31,7 +31,7 @@ public class FileHandlerImpl implements FileHandler{
 		} catch (Exception e) {
 			throw e;
 		}
-		
+		file.getContentType();
 		return true;
 		
 		// u rest arhitekturi ne postoji sve sto se tice redirecta a sve ostalo ostaje. u return se vraca ili true ili false

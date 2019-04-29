@@ -33,4 +33,6 @@ public interface SchoolClassService {
 	 PupilsInClass deletePupilsInClass(Long id);
 	 boolean ifExistsCode(String code);
 	 List<PupilsInClass> findConectionBySchoolClass(SchoolClass schoolClass);
+	 List<SchoolClass> findClassByProfessor(Long id);
+	 List<SchoolClass> findClassByProfessorAndSubject(Long idP, Long idS);
 }

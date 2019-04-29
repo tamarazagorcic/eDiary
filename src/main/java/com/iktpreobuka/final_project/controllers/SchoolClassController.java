@@ -17,6 +17,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,6 +85,7 @@ public class SchoolClassController {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_PROFESSOR")
 	@JsonView(View.Private.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/private")
@@ -113,6 +115,7 @@ public class SchoolClassController {
 
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/admin")
@@ -142,7 +145,8 @@ public class SchoolClassController {
 
 	}
 
-	@Secured("ROLE_ADMIN")
+	@CrossOrigin
+	@Secured({"ROLE_ADMIN", "ROLE_PROFESSOR"})
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	public ResponseEntity<?> findBySCId(@PathVariable Long id) {
@@ -175,6 +179,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.POST) //, consumes = "application/json"
@@ -222,7 +227,7 @@ public class SchoolClassController {
 
 	}
 
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
@@ -279,6 +284,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -312,6 +318,7 @@ public class SchoolClassController {
 		}
 	}
 
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupil/{id}")
@@ -347,6 +354,7 @@ public class SchoolClassController {
 
 	}
 
+	@CrossOrigin
 	@Secured({"ROLE_PUPIL", "ROLE_PARENT"})
 	@JsonView(View.Public.class)
 	@RequestMapping(method = RequestMethod.GET, value = "/pupilandclass/{id}")
@@ -389,6 +397,7 @@ public class SchoolClassController {
 
 	}
 	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idSc}/pupil/{idP}")
@@ -431,7 +440,7 @@ public class SchoolClassController {
 		}
 	}
 
-	
+	@CrossOrigin
 	@Secured("ROLE_ADMIN")
 	@JsonView(View.Admin.class)
 	@RequestMapping(method = RequestMethod.PUT, value = "/{idP}/subject/{idS}/class/{idSC}")

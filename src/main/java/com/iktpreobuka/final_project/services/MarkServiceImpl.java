@@ -73,4 +73,8 @@ public class MarkServiceImpl implements MarkService{
 	public List<Mark> findMarksByActivity(Activity activity){
 		return markRepo.findByActivity(activity);
 	}
+	
+	public List<Mark> findMarksByPupilAndProfessorAndActivity(PupilsInClass pc, ProfessorSubjectClass psc,Activity activity){
+		return markRepo.findByPupilAndProfessorAndActivity(pc, psc, activity);
+	}
 }
